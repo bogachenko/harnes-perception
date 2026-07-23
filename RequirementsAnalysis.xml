@@ -112,6 +112,65 @@
         </USE_CASE>
     </USE_CASES>
 
+    <STATE_MODEL id="STATE-MODEL-PERCEPTION-INPUT-EVENT"
+                 subject_ref="INPUT-EXTERNAL-EVENT">
+        <INITIAL_STATE ref="STATE-PERCEPTION-QUEUED" />
+        <FINAL_STATE ref="STATE-PERCEPTION-PROCESSED" />
+
+        <STATES>
+            <STATE id="STATE-PERCEPTION-QUEUED">
+                Событие находится в очереди и ожидает выбора для обработки.
+            </STATE>
+
+            <STATE id="STATE-PERCEPTION-PROCESSING">
+                Событие выбрано из очереди и обрабатывается атомарно.
+            </STATE>
+
+            <STATE id="STATE-PERCEPTION-PROCESSED">
+                Каноническое наблюдение успешно сформировано и передано
+                в Оркестрацию и непрерывность — Harness / Google ADK Go.
+                Событие удалено из очереди.
+            </STATE>
+        </STATES>
+
+        <TRANSITIONS>
+            <TRANSITION id="TRANSITION-PERCEPTION-QUEUED-TO-PROCESSING">
+                <FROM ref="STATE-PERCEPTION-QUEUED" />
+                <TO ref="STATE-PERCEPTION-PROCESSING" />
+                <CONDITION>
+                    Событие выбрано следующим для обработки с учётом степени
+                    важности и времени первоначального поступления.
+                </CONDITION>
+            </TRANSITION>
+
+            <TRANSITION id="TRANSITION-PERCEPTION-PROCESSING-TO-QUEUED">
+                <FROM ref="STATE-PERCEPTION-PROCESSING" />
+                <TO ref="STATE-PERCEPTION-QUEUED" />
+                <CONDITION>
+                    Во время обработки поступило событие с более высокой
+                    степенью важности.
+                </CONDITION>
+                <EFFECT>
+                    Текущая обработка полностью отменяется. Событие сразу
+                    возвращается в очередь, сохраняет время первоначального
+                    поступления и при следующем выборе обрабатывается заново.
+                </EFFECT>
+            </TRANSITION>
+
+            <TRANSITION id="TRANSITION-PERCEPTION-PROCESSING-TO-PROCESSED">
+                <FROM ref="STATE-PERCEPTION-PROCESSING" />
+                <TO ref="STATE-PERCEPTION-PROCESSED" />
+                <CONDITION>
+                    Каноническое наблюдение успешно сформировано и передано
+                    в Оркестрацию и непрерывность — Harness / Google ADK Go.
+                </CONDITION>
+                <EFFECT>
+                    Событие удаляется из очереди.
+                </EFFECT>
+            </TRANSITION>
+        </TRANSITIONS>
+    </STATE_MODEL>
+
     <BUSINESS_PROCESS id="BP-PERCEPTION-EVENT-PROCESSING">
         <STEP order="1" id="STEP-RECEIVE-EVENT">
             Получить входное событие от внешнего источника вместе с заданной
