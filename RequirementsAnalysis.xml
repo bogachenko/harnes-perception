@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<REQUIREMENTS_ANALYSIS id="RA-HARNES-PERCEPTION" status="DRAFT">
+    <PROJECT_GOAL id="GOAL-PERCEPTION-001" status="APPROVED_BY_OWNER">
+        Обеспечить программным системам единый способ принимать разнородные внешние данные,
+        технически преобразовывать их и выпускать канонические наблюдения с сохранёнными
+        сведениями о происхождении, времени, качестве, полноте и неопределённости результата.
+
+        <SCOPE_BOUNDARY>
+            <NON_RESPONSIBILITY>Не определять важность наблюдений.</NON_RESPONSIBILITY>
+            <NON_RESPONSIBILITY>Не интерпретировать наблюдения относительно целей или общей модели мира.</NON_RESPONSIBILITY>
+            <NON_RESPONSIBILITY>Не принимать решение о долговременном сохранении.</NON_RESPONSIBILITY>
+            <NON_RESPONSIBILITY>Не планировать и не выполнять внешние действия.</NON_RESPONSIBILITY>
+            <NON_RESPONSIBILITY>Не обучаться на полученных результатах.</NON_RESPONSIBILITY>
+        </SCOPE_BOUNDARY>
+
+        <SUCCESS_CRITERIA>
+            <CRITERION>Поддерживаемый входной сигнал преобразован в наблюдение с канонической структурой.</CRITERION>
+            <CRITERION>Наблюдение сохраняет связь с источником.</CRITERION>
+            <CRITERION>Наблюдение явно отражает применённые преобразования.</CRITERION>
+            <CRITERION>Наблюдение содержит доступные показатели качества и неопределённости.</CRITERION>
+            <CRITERION>Вероятностный результат не выдаётся за подтверждённый факт.</CRITERION>
+            <CRITERION>Наблюдение может быть передано следующему компоненту без обязательного долговременного сохранения.</CRITERION>
+        </SUCCESS_CRITERIA>
+    </PROJECT_GOAL>
+</REQUIREMENTS_ANALYSIS>
