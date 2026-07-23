@@ -14,6 +14,21 @@
         </TRACES_TO>
     </LANGUAGE>
 
+    <FRAMEWORKS id="TECH-FRAMEWORKS">
+        <APPLICATION_FRAMEWORK id="TECH-APPLICATION-FRAMEWORK">
+            <SELECTION>NONE</SELECTION>
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                Реализация harnes-perception выполняется без прикладного
+                Go-фреймворка.
+            </RATIONALE>
+            <TRACES_TO>
+                <GOAL ref="GOAL-PERCEPTION-001" />
+                <BUSINESS_PROCESS ref="BP-PERCEPTION-EVENT-PROCESSING" />
+            </TRACES_TO>
+        </APPLICATION_FRAMEWORK>
+    </FRAMEWORKS>
+
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
