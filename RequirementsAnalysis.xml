@@ -332,32 +332,40 @@
             источником степенью важности.
         </STEP>
 
-        <STEP order="2" id="STEP-QUEUE-EVENT">
-            Сохранить событие в очереди обработки.
+        <STEP order="2" id="STEP-VALIDATE-IMPORTANCE">
+            Проверить наличие степени важности и принадлежность её значения
+            множеству low, medium, high. При отсутствии степени важности или
+            недопустимом значении отклонить событие и завершить процесс для него
+            без помещения в очередь.
         </STEP>
 
-        <STEP order="3" id="STEP-SELECT-EVENT">
+        <STEP order="3" id="STEP-QUEUE-EVENT">
+            Сохранить в очереди обработки событие, прошедшее проверку степени
+            важности.
+        </STEP>
+
+        <STEP order="4" id="STEP-SELECT-EVENT">
             Выбрать событие с наибольшей степенью важности; среди событий с
             одинаковой степенью важности выбрать событие с наиболее ранним
             временем первоначального поступления, а при совпадении этого времени —
             событие, которое harnes-perception фактически принял раньше.
         </STEP>
 
-        <STEP order="4" id="STEP-PROCESS-EVENT">
+        <STEP order="5" id="STEP-PROCESS-EVENT">
             Атомарно обработать выбранное событие.
         </STEP>
 
-        <STEP order="5" id="STEP-PREEMPT-ON-HIGHER-IMPORTANCE">
+        <STEP order="6" id="STEP-PREEMPT-ON-HIGHER-IMPORTANCE">
             При поступлении более важного события полностью отменить текущую
             обработку менее важного события, оставить отменённое событие в
             очереди и перейти к обработке более важного события.
         </STEP>
 
-        <STEP order="6" id="STEP-FORM-OBSERVATION">
+        <STEP order="7" id="STEP-FORM-OBSERVATION">
             После завершения обработки сформировать каноническое наблюдение.
         </STEP>
 
-        <STEP order="7" id="STEP-RETURN-OBSERVATION">
+        <STEP order="8" id="STEP-RETURN-OBSERVATION">
             Вернуть каноническое наблюдение вызывающему компоненту
             и удалить входное событие из очереди.
         </STEP>
@@ -423,13 +431,13 @@
 
         <LINK from="REQ-PERCEPTION-IMPORTANCE-SOURCE"
               relation="GOVERNS"
-              to="STEP-RECEIVE-EVENT" />
+              to="STEP-VALIDATE-IMPORTANCE" />
         <LINK from="REQ-PERCEPTION-NOISE-EXCLUDED"
               relation="GOVERNS"
               to="STEP-RECEIVE-EVENT" />
         <LINK from="REQ-PERCEPTION-IMPORTANCE-LEVELS"
               relation="GOVERNS"
-              to="STEP-RECEIVE-EVENT" />
+              to="STEP-VALIDATE-IMPORTANCE" />
         <LINK from="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH"
               relation="GOVERNS"
               to="STEP-FORM-OBSERVATION" />
@@ -479,10 +487,10 @@
 
         <LINK from="ERR-PERCEPTION-MISSING-IMPORTANCE"
               relation="APPLIES_TO"
-              to="STEP-RECEIVE-EVENT" />
+              to="STEP-VALIDATE-IMPORTANCE" />
         <LINK from="ERR-PERCEPTION-INVALID-IMPORTANCE"
               relation="APPLIES_TO"
-              to="STEP-RECEIVE-EVENT" />
+              to="STEP-VALIDATE-IMPORTANCE" />
         <LINK from="ERR-PERCEPTION-PROCESSING-FAILED"
               relation="APPLIES_TO"
               to="STEP-PROCESS-EVENT" />
