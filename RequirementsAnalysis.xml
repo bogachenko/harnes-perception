@@ -1490,4 +1490,177 @@
             <INVARIANT ref="INV-PERCEPTION-PARTIALITY" />
         </LINKS>
     </FUNCTIONAL_REQUIREMENTS>
+
+    <FUNCTIONAL_REQUIREMENTS id="FRG-PERCEPTION-STREAMING-INPUT" status="APPROVED_BY_OWNER">
+        <NAME>Обработка инициативно поступающих и потоковых входов</NAME>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-001" priority="MUST">
+            <NAME>Приём без отдельного запроса потребителя</NAME>
+            <STATEMENT>
+                Компонент должен поддерживать приём данных, поступающих по инициативе
+                зарегистрированного источника без отдельного запроса потребителя
+                для каждой единицы входа.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Инициативно поступившая поддерживаемая единица входа может быть
+                зарегистрирована и обработана как самостоятельная операция восприятия.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-002" priority="MUST">
+            <NAME>Ограничение области одной операции</NAME>
+            <STATEMENT>
+                Для непрерывного или длительного потока компонент должен выделять
+                ограниченные единицы обработки, каждая из которых относится
+                к самостоятельной операции восприятия.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Непрерывный поток не представлен одной неограниченно продолжающейся
+                операцией без самостоятельных промежуточных исходов.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-003" priority="MUST">
+            <NAME>Прослеживаемость до положения в потоке</NAME>
+            <STATEMENT>
+                Если источник предоставляет идентификатор потока, раздела, сообщения,
+                последовательности, смещение или иной указатель положения,
+                компонент должен связать эти сведения с соответствующим входом.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Для наблюдения или отказа можно восстановить доступное положение
+                породившего его входа в исходном потоке.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-004" priority="MUST">
+            <NAME>Сохранение заявленного порядка поступления</NAME>
+            <STATEMENT>
+                Если источник предоставляет определённый порядок единиц входа,
+                компонент должен сохранять сведения об этом порядке независимо
+                от фактического порядка завершения операций.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Параллельное или неодинаковое по длительности преобразование
+                не уничтожает сведения об исходной последовательности входов.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-005" priority="MUST">
+            <NAME>Явность отсутствия гарантии порядка</NAME>
+            <STATEMENT>
+                Если источник не предоставляет надёжных сведений о порядке,
+                компонент не должен самостоятельно представлять порядок поступления
+                как порядок исходных событий.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Технический порядок получения не выдаётся за подтверждённую
+                последовательность событий источника.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-006" priority="MUST">
+            <NAME>Представление обнаруженного разрыва</NAME>
+            <STATEMENT>
+                Если по доступным указателям последовательности компонент обнаружил
+                пропуск, разрыв или потерю части потока, это должно быть отражено
+                в связанном результате обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Наблюдения после обнаруженного разрыва не представляются
+                как полученные из заведомо непрерывного полного потока.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-007" priority="MUST">
+            <NAME>Явность возможного повторного поступления</NAME>
+            <STATEMENT>
+                Повторно поступившая единица входа не должна неявно перезаписывать
+                ранее зарегистрированный вход или результат его обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Повторное поступление сохраняет самостоятельную операционную историю,
+                даже если оно связано с тем же сообщением или положением в потоке.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-008" priority="MUST">
+            <NAME>Различение повторной доставки и нового события</NAME>
+            <STATEMENT>
+                Если источник предоставляет достаточный устойчивый идентификатор,
+                компонент должен сохранить возможность отличить повторную доставку
+                ранее поступавшего входа от нового входа.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Наличие технического совпадения может быть представлено потребителю,
+                но не приводит к автоматическому объединению операций или наблюдений.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-009" priority="MUST">
+            <NAME>Явное прекращение доступности потока</NAME>
+            <STATEMENT>
+                Если зарегистрированный поток или канал становится недоступен,
+                компонент должен представить это как самостоятельное техническое
+                состояние источника, не изменяя исход уже завершённых операций.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Недоступность канала отличима от невозможности преобразования
+                конкретной ранее принятой единицы входа.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-STREAMING-010" priority="MUST">
+            <NAME>Запрет неявного восстановления пропущенных данных</NAME>
+            <STATEMENT>
+                Компонент не должен самостоятельно создавать отсутствующие части потока
+                или представлять вычисленное продолжение как фактически поступивший вход.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Восстановленное, интерполированное или сгенерированное представление,
+                если такое преобразование применяется, явно обозначено как производное.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <BOUNDARY>
+            <RULE>
+                Требования не определяют конкретные брокеры сообщений, протоколы,
+                транспортные соединения или механизмы подписки.
+            </RULE>
+            <RULE>
+                Требования не устанавливают конкретный размер временного окна,
+                длительность фрагмента или количество сообщений в одной операции.
+            </RULE>
+            <RULE>
+                Требования не определяют политику автоматического переподключения,
+                интервалы повторов и предел количества попыток.
+            </RULE>
+            <RULE>
+                Требования не устанавливают семантику доставки at-most-once,
+                at-least-once или exactly-once.
+            </RULE>
+            <RULE>
+                Требования не разрешают автоматически объединять повторные входы,
+                наблюдения или события в единую предметную сущность.
+            </RULE>
+        </BOUNDARY>
+
+        <LINKS>
+            <PROJECT_GOAL ref="GOAL-PERCEPTION-001" />
+            <ACTOR_GOAL ref="AAG-PERCEPTION-002" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
+            <ACTOR ref="ACTOR-DATA-SOURCE" />
+            <ACTOR ref="ACTOR-PERCEPTION-CONSUMER" />
+            <ENTITY ref="ENT-DATA-SOURCE" />
+            <ENTITY ref="ENT-PERCEPTION-INPUT" />
+            <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+            <ENTITY ref="ENT-OBSERVATION" />
+            <ENTITY ref="ENT-PERCEPTION-FAILURE" />
+            <INVARIANT ref="INV-PERCEPTION-TRACEABILITY" />
+            <INVARIANT ref="INV-PERCEPTION-SOURCE-PROVENANCE" />
+            <INVARIANT ref="INV-PERCEPTION-OPERATION-IDENTITY" />
+            <INVARIANT ref="INV-PERCEPTION-PARTIALITY" />
+            <INVARIANT ref="INV-PERCEPTION-TIME-SEPARATION" />
+        </LINKS>
+    </FUNCTIONAL_REQUIREMENTS>
 </REQUIREMENTS_ANALYSIS>
