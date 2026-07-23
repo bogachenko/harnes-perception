@@ -4,15 +4,18 @@
         Принимать внешний сигнал или уже сформированный внешним источником
         пакет данных и формировать каноническое наблюдение, содержащее
         нормализованные исходные данные, приведённые к единому представлению
-        без дополнения их смысла, происхождение, временные характеристики,
-        качество, неопределённость и ссылку на исходный материал, для возврата
+        без дополнения их смысла, ID внешнего источника, timestamp момента
+        поступления события в harnes-perception и ссылку на исходный материал,
+        для возврата
         вызывающему компоненту.
     </PROJECT_GOAL>
 
     <ACTORS>
         <ACTOR id="ACTOR-EXTERNAL-SOURCE">
-            Внешний источник передаёт внешний сигнал или пакет данных и до
-            передачи определяет степень важности входного события.
+            Внешним источником является пользовательский UI, автономный
+            MCP-сервер или tool, способный инициировать запрос harnes-perception.
+            Каждый внешний источник имеет ID, передаёт внешний сигнал или пакет
+            данных и до передачи определяет степень важности входного события.
         </ACTOR>
 
         <ACTOR id="ACTOR-CALLING-COMPONENT">
@@ -24,7 +27,8 @@
     <INPUTS>
         <INPUT id="INPUT-EXTERNAL-EVENT">
             Внешний сигнал или уже сформированный внешним источником пакет
-            данных со степенью важности, определённой внешним источником.
+            данных со ссылкой на исходный материал и степенью важности,
+            определённой внешним источником.
         </INPUT>
     </INPUTS>
 
@@ -32,25 +36,27 @@
         <OUTPUT id="OUTPUT-CANONICAL-OBSERVATION">
             Каноническое наблюдение, содержащее нормализованные исходные данные,
             приведённые к единому представлению без дополнения их смысла,
-            происхождение, временные характеристики, качество, неопределённость,
-            ссылку на исходный материал и полученную степень важности без
-            изменения.
+            ID внешнего источника, timestamp момента поступления события
+            в harnes-perception, ссылку на исходный материал без изменения
+            и полученную степень важности без изменения.
         </OUTPUT>
     </OUTPUTS>
 
     <ENTITIES>
         <ENTITY id="ENTITY-PERCEPTION-INPUT-EVENT">
             Входное событие: внешний сигнал или уже сформированный внешним
-            источником пакет данных со степенью важности, определённой внешним
-            источником до передачи в harnes-perception.
+            источником пакет данных со ссылкой на исходный материал и степенью
+            важности, определённой внешним источником до передачи
+            в harnes-perception.
         </ENTITY>
 
         <ENTITY id="ENTITY-PERCEPTION-CANONICAL-OBSERVATION">
             Каноническое наблюдение: результат обработки входного события,
             содержащий нормализованные исходные данные, приведённые к единому
-            представлению без дополнения их смысла, происхождение, временные
-            характеристики, качество, неопределённость, ссылку на исходный материал
-            и полученную степень важности без изменения.
+            представлению без дополнения их смысла, ID внешнего источника,
+            timestamp момента поступления события в harnes-perception, ссылку
+            на исходный материал без изменения и полученную степень важности
+            без изменения.
         </ENTITY>
     </ENTITIES>
 
@@ -118,6 +124,23 @@
         <REQUIREMENT id="REQ-PERCEPTION-IMPORTANCE-SOURCE">
             Степень важности входного события определяется внешним источником
             до передачи события в harnes-perception.
+        </REQUIREMENT>
+
+        <REQUIREMENT id="REQ-PERCEPTION-SOURCE-ID">
+            harnes-perception фиксирует ID внешнего источника, инициировавшего
+            запрос, и включает этот ID в каноническое наблюдение.
+        </REQUIREMENT>
+
+        <REQUIREMENT id="REQ-PERCEPTION-RECEIPT-TIMESTAMP">
+            При поступлении входного события harnes-perception фиксирует timestamp
+            момента его поступления и включает этот timestamp в каноническое
+            наблюдение.
+        </REQUIREMENT>
+
+        <REQUIREMENT id="REQ-PERCEPTION-SOURCE-LINK-PASSTHROUGH">
+            Внешний источник передаёт ссылку на исходный материал вместе
+            с входным событием. harnes-perception включает полученную ссылку
+            в каноническое наблюдение без изменения.
         </REQUIREMENT>
 
         <REQUIREMENT id="REQ-PERCEPTION-NOISE-EXCLUDED">
@@ -195,8 +218,9 @@
             При успешной обработке входного события вызывающему компоненту
             возвращается каноническое наблюдение, содержащее нормализованные исходные
             данные, приведённые к единому представлению без дополнения их смысла,
-            происхождение, временные характеристики, качество, неопределённость,
-            ссылку на исходный материал и полученную степень важности без изменения.
+            ID внешнего источника, timestamp момента поступления события
+            в harnes-perception, ссылку на исходный материал без изменения
+            и полученную степень важности без изменения.
             Входное событие удаляется из очереди.
         </CRITERION>
 
@@ -252,7 +276,8 @@
             <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
             <ACTION>
                 Передать внешний сигнал или уже сформированный пакет данных
-                со степенью важности, определённой до передачи.
+                со ссылкой на исходный материал и степенью важности,
+                определённой до передачи.
             </ACTION>
             <GOAL>
                 Передать внешние данные в harnes-perception для формирования
@@ -343,8 +368,10 @@
 
     <BUSINESS_PROCESS id="BP-PERCEPTION-EVENT-PROCESSING">
         <STEP order="1" id="STEP-RECEIVE-EVENT">
-            Получить входное событие от внешнего источника вместе с заданной
-            источником степенью важности.
+            Получить входное событие от внешнего источника вместе со ссылкой
+            на исходный материал и заданной источником степенью важности.
+            Зафиксировать ID внешнего источника, инициировавшего запрос,
+            и timestamp момента поступления события в harnes-perception.
         </STEP>
 
         <STEP order="2" id="STEP-VALIDATE-IMPORTANCE">
@@ -380,7 +407,11 @@
         </STEP>
 
         <STEP order="7" id="STEP-FORM-OBSERVATION">
-            После успешного завершения обработки сформировать каноническое наблюдение.
+            После успешного завершения обработки сформировать каноническое
+            наблюдение с нормализованными исходными данными, ID внешнего источника,
+            timestamp момента поступления события в harnes-perception, ссылкой
+            на исходный материал без изменения и полученной степенью важности
+            без изменения.
         </STEP>
 
         <STEP order="8" id="STEP-RETURN-OBSERVATION">
@@ -450,6 +481,24 @@
         <LINK from="REQ-PERCEPTION-IMPORTANCE-SOURCE"
               relation="GOVERNS"
               to="STEP-VALIDATE-IMPORTANCE" />
+        <LINK from="REQ-PERCEPTION-SOURCE-ID"
+              relation="GOVERNS"
+              to="STEP-RECEIVE-EVENT" />
+        <LINK from="REQ-PERCEPTION-SOURCE-ID"
+              relation="GOVERNS"
+              to="STEP-FORM-OBSERVATION" />
+        <LINK from="REQ-PERCEPTION-RECEIPT-TIMESTAMP"
+              relation="GOVERNS"
+              to="STEP-RECEIVE-EVENT" />
+        <LINK from="REQ-PERCEPTION-RECEIPT-TIMESTAMP"
+              relation="GOVERNS"
+              to="STEP-FORM-OBSERVATION" />
+        <LINK from="REQ-PERCEPTION-SOURCE-LINK-PASSTHROUGH"
+              relation="GOVERNS"
+              to="STEP-RECEIVE-EVENT" />
+        <LINK from="REQ-PERCEPTION-SOURCE-LINK-PASSTHROUGH"
+              relation="GOVERNS"
+              to="STEP-FORM-OBSERVATION" />
         <LINK from="REQ-PERCEPTION-NOISE-EXCLUDED"
               relation="GOVERNS"
               to="STEP-RECEIVE-EVENT" />
@@ -532,6 +581,15 @@
         <LINK from="CRITERION-PERCEPTION-SUCCESS"
               relation="VERIFIES"
               to="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-SOURCE-ID" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-RECEIPT-TIMESTAMP" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-SOURCE-LINK-PASSTHROUGH" />
         <LINK from="CRITERION-PERCEPTION-SUCCESS"
               relation="VERIFIES"
               to="INV-PERCEPTION-REMOVAL-CONDITIONS" />
