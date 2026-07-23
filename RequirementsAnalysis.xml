@@ -407,11 +407,12 @@
             событие, которое harnes-perception фактически принял раньше.
         </STEP>
 
-        <STEP order="6" id="STEP-PROCESS-EVENT">
-            Атомарно обработать выбранное событие. Если обработка завершается
-            ошибкой до формирования канонического наблюдения, удалить событие
-            из очереди, не создавать каноническое наблюдение и завершить процесс
-            для этого события.
+        <STEP order="6" id="STEP-NORMALIZE-EVENT">
+            Атомарно нормализовать data выбранного события, приведя его
+            к единому представлению без дополнения смысла. Если нормализация
+            завершается ошибкой до формирования канонического наблюдения,
+            удалить событие из очереди, не создавать каноническое наблюдение
+            и завершить процесс для этого события.
         </STEP>
 
         <STEP order="7" id="STEP-PREEMPT-ON-HIGHER-IMPORTANCE">
@@ -540,7 +541,7 @@
               to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
         <LINK from="REQ-PERCEPTION-ATOMIC-PROCESSING"
               relation="GOVERNS"
-              to="STEP-PROCESS-EVENT" />
+              to="STEP-NORMALIZE-EVENT" />
         <LINK from="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION"
               relation="GOVERNS"
               to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
@@ -559,7 +560,7 @@
               to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
         <LINK from="INV-PERCEPTION-NO-PARTIAL-OBSERVATION"
               relation="APPLIES_TO"
-              to="STEP-PROCESS-EVENT" />
+              to="STEP-NORMALIZE-EVENT" />
         <LINK from="INV-PERCEPTION-NO-PARTIAL-OBSERVATION"
               relation="APPLIES_TO"
               to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
@@ -578,7 +579,7 @@
               to="STEP-VALIDATE-IMPORTANCE" />
         <LINK from="ERR-PERCEPTION-PROCESSING-FAILED"
               relation="APPLIES_TO"
-              to="STEP-PROCESS-EVENT" />
+              to="STEP-NORMALIZE-EVENT" />
         <LINK from="ERR-PERCEPTION-PROCESSING-FAILED"
               relation="APPLIES_TO"
               to="STATE-PERCEPTION-PROCESSING" />
