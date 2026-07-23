@@ -1325,4 +1325,169 @@
             <INVARIANT ref="INV-PERCEPTION-OUTCOME-HONESTY" />
         </LINKS>
     </FUNCTIONAL_REQUIREMENTS>
+
+    <FUNCTIONAL_REQUIREMENTS id="FRG-PERCEPTION-FAILURE" status="APPROVED_BY_OWNER">
+        <NAME>Типизация и представление невозможности обработки</NAME>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-001" priority="MUST">
+            <NAME>Самостоятельный результат невозможности обработки</NAME>
+            <STATEMENT>
+                Если операция не смогла выпустить требуемое каноническое наблюдение,
+                компонент должен сформировать самостоятельный типизированный результат
+                невозможности обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Невозможность обработки представлена отдельно от наблюдения
+                и не маскируется пустым или фиктивным успешным результатом.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-002" priority="MUST">
+            <NAME>Связь отказа с операцией и входом</NAME>
+            <STATEMENT>
+                Каждый результат невозможности обработки должен быть связан
+                с конкретной операцией восприятия и через неё с обработанным входом.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Для результата отказа можно определить операцию и вход,
+                при обработке которых он возник.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-003" priority="MUST">
+            <NAME>Определение этапа возникновения</NAME>
+            <STATEMENT>
+                Результат невозможности обработки должен указывать этап процесса,
+                на котором дальнейшее формирование наблюдения стало невозможным.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Потребитель может отличить невозможность приёма, проверки,
+                получения ресурса, преобразования и канонизации результата.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-004" priority="MUST">
+            <NAME>Типизированная категория причины</NAME>
+            <STATEMENT>
+                Компонент должен представлять известную причину невозможности обработки
+                устойчивой предметной категорией, пригодной для программного различения.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Основная причина отказа различима без анализа свободного текста
+                или внутренних сообщений конкретного обработчика.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-005" priority="MUST">
+            <NAME>Представление непосредственной технической причины</NAME>
+            <STATEMENT>
+                Если невозможность обработки вызвана источником, ресурсом,
+                обработчиком или внутренним техническим сбоем, результат отказа должен
+                содержать либо однозначно предоставлять доступные сведения
+                о непосредственной технической причине.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Типизированная категория не уничтожает доступную техническую информацию,
+                необходимую для диагностики конкретного случая.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-006" priority="MUST">
+            <NAME>Явность неизвестной причины</NAME>
+            <STATEMENT>
+                Если точная причина невозможности обработки неизвестна,
+                компонент должен обозначить её как неизвестную и не создавать
+                неподтверждённое объяснение.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Предполагаемая причина не представляется как установленная техническая причина.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-007" priority="MUST">
+            <NAME>Различение устранимости причины</NAME>
+            <STATEMENT>
+                Если доступных сведений достаточно, результат отказа должен указывать,
+                является ли причина временной, постоянной либо имеет неизвестный характер.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Потребитель может отличить заведомо постоянную причину
+                от потенциально временной, не получая при этом предписания
+                автоматически повторять операцию.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-008" priority="MUST">
+            <NAME>Представление частичного успешного исхода</NAME>
+            <STATEMENT>
+                Если операция выпустила пригодные наблюдения, но не смогла обработать
+                другую ограниченную часть входа, компонент должен представить
+                успешные наблюдения и связанные технические проблемы как частичный исход.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Частичный исход не представляется ни как полный успех,
+                ни как полное отсутствие пригодного результата.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-009" priority="MUST">
+            <NAME>Различение предметного отказа и сбоя передачи</NAME>
+            <STATEMENT>
+                Невозможность сформировать наблюдение должна быть представлена отдельно
+                от ошибки передачи уже сформированного результата потребителю.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Транспортный сбой не изменяет предметный исход операции восприятия,
+                а предметный отказ не обозначается как ошибка транспорта.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-FAILURE-010" priority="MUST">
+            <NAME>Неизменность окончательного исхода</NAME>
+            <STATEMENT>
+                После завершения операции результат невозможности обработки
+                не должен неявно изменяться или заменяться успешным наблюдением.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Последующая попытка обработки того же входа создаёт новую операцию
+                с собственным самостоятельным исходом.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <BOUNDARY>
+            <RULE>
+                Требования не определяют конкретные коды ошибок,
+                числовые значения или программные типы категорий.
+            </RULE>
+            <RULE>
+                Требования не определяют формат диагностического сообщения,
+                сериализацию или локализацию текста.
+            </RULE>
+            <RULE>
+                Требования не устанавливают политику автоматических повторных попыток,
+                задержки, количество повторов или выбор нового обработчика.
+            </RULE>
+            <RULE>
+                Требования не определяют мониторинг, оповещения,
+                журналы эксплуатации и внешние системы диагностики.
+            </RULE>
+            <RULE>
+                Результат отказа сообщает техническую невозможность обработки,
+                но не определяет значимость последствий для потребителя.
+            </RULE>
+        </BOUNDARY>
+
+        <LINKS>
+            <PROJECT_GOAL ref="GOAL-PERCEPTION-001" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
+            <ENTITY ref="ENT-PERCEPTION-INPUT" />
+            <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+            <ENTITY ref="ENT-OBSERVATION" />
+            <ENTITY ref="ENT-PERCEPTION-FAILURE" />
+            <INVARIANT ref="INV-PERCEPTION-TRACEABILITY" />
+            <INVARIANT ref="INV-PERCEPTION-OUTCOME-HONESTY" />
+            <INVARIANT ref="INV-PERCEPTION-OPERATION-IDENTITY" />
+            <INVARIANT ref="INV-PERCEPTION-PARTIALITY" />
+        </LINKS>
+    </FUNCTIONAL_REQUIREMENTS>
 </REQUIREMENTS_ANALYSIS>
