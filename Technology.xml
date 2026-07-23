@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TECHNOLOGY id="TECH-HARNES-PERCEPTION" status="DRAFT">
+    <LANGUAGE id="TECH-LANGUAGE-GO">
+        <NAME>Go</NAME>
+        <GO_DIRECTIVE>1.25.4</GO_DIRECTIVE>
+        <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+        <RATIONALE>
+            Фиксирует утверждённые владельцем язык реализации
+            и значение директивы go.
+        </RATIONALE>
+        <TRACES_TO>
+            <GOAL ref="GOAL-PERCEPTION-001" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-EVENT-PROCESSING" />
+        </TRACES_TO>
+    </LANGUAGE>
+
+    <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
+        <PATH>github.com/bogachenko/harnes-perception</PATH>
+        <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+        <LANGUAGE ref="TECH-LANGUAGE-GO" />
+    </MODULE_IDENTITY>
+</TECHNOLOGY>
