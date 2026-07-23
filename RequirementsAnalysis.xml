@@ -273,7 +273,10 @@
         <SCOPE>
             Модель описывает только входные события, которые успешно прошли
             проверку степени важности и были помещены в очередь. События,
-            отклонённые до помещения в очередь, в модель не входят.
+            отклонённые до помещения в очередь, в модель не входят. Если обработка
+            завершается ошибкой до формирования канонического наблюдения, событие
+            удаляется из очереди, после чего модель перестаёт применяться к нему.
+            Отдельное постоянное ошибочное состояние не создаётся.
         </SCOPE>
 
         <INITIAL_STATE ref="STATE-PERCEPTION-QUEUED" />
@@ -505,6 +508,9 @@
         <LINK from="ERR-PERCEPTION-PROCESSING-FAILED"
               relation="APPLIES_TO"
               to="STEP-PROCESS-EVENT" />
+        <LINK from="ERR-PERCEPTION-PROCESSING-FAILED"
+              relation="APPLIES_TO"
+              to="STATE-PERCEPTION-PROCESSING" />
 
         <LINK from="EDGE-PERCEPTION-EQUAL-IMPORTANCE"
               relation="APPLIES_TO"
