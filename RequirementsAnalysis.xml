@@ -1025,4 +1025,140 @@
             <INVARIANT ref="INV-PERCEPTION-TIME-SEPARATION" />
         </LINKS>
     </FUNCTIONAL_REQUIREMENTS>
+
+    <FUNCTIONAL_REQUIREMENTS id="FRG-PERCEPTION-DELIVERY" status="APPROVED_BY_OWNER">
+        <NAME>Передача результата операции потребителю</NAME>
+
+        <REQUIREMENT id="FR-PERCEPTION-DELIVERY-001" priority="MUST">
+            <NAME>Передача однозначного результата операции</NAME>
+            <STATEMENT>
+                После завершения операции компонент должен предоставить потребителю
+                либо одно или несколько канонических наблюдений, либо типизированный
+                результат невозможности обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Потребитель может однозначно определить, завершилась операция успешно,
+                частично успешно или без выпуска наблюдения.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-DELIVERY-002" priority="MUST">
+            <NAME>Связь результата с операцией</NAME>
+            <STATEMENT>
+                Каждый передаваемый результат должен сохранять связь с конкретной
+                операцией восприятия, в рамках которой он был сформирован.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Потребитель может сопоставить полученный результат с исходным запросом,
+                событием или входом через идентичность операции.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-DELIVERY-003" priority="MUST">
+            <NAME>Передача всех выпущенных наблюдений</NAME>
+            <STATEMENT>
+                Если операция выпустила несколько самостоятельных канонических наблюдений,
+                компонент должен предоставить потребителю полный набор выпущенных
+                наблюдений либо явно обозначить частичность передачи.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Отсутствие части выпущенных наблюдений не представляется как полная
+                успешная передача результата операции.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-DELIVERY-004" priority="MUST">
+            <NAME>Сохранение порядка внутри результата операции</NAME>
+            <STATEMENT>
+                Если порядок наблюдений является частью результата преобразования,
+                компонент должен сохранить этот порядок при передаче потребителю.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Наблюдения, имеющие определённую последовательность в рамках операции,
+                не передаются в ином порядке без явного обозначения отсутствия гарантии порядка.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-DELIVERY-005" priority="MUST">
+            <NAME>Передача результата невозможности обработки</NAME>
+            <STATEMENT>
+                Типизированный результат невозможности обработки должен быть передан
+                потребителю с доступной технической причиной и связью с операцией.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Потребитель может отличить неподдерживаемый вход, недоступный ресурс,
+                ошибку преобразования и невозможность канонизации, если такая причина известна.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-DELIVERY-006" priority="MUST">
+            <NAME>Запрет подмены результата транспортным успехом</NAME>
+            <STATEMENT>
+                Успешная передача сообщения или ответ транспорта не должны считаться
+                успешным восприятием, если операция завершилась без корректного наблюдения.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Транспортный статус и предметный результат операции представлены
+                как разные характеристики.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-DELIVERY-007" priority="MUST">
+            <NAME>Необязательность долговременного хранения</NAME>
+            <STATEMENT>
+                Передача результата потребителю не должна требовать обязательного
+                долговременного сохранения наблюдения или исходных данных внутри компонента.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Операция может завершиться передачей результата и последующим освобождением
+                временных ресурсов без создания постоянной записи.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-DELIVERY-008" priority="MUST">
+            <NAME>Явное завершение операции</NAME>
+            <STATEMENT>
+                Компонент должен явно обозначить момент, после которого операция
+                больше не выпустит дополнительные наблюдения или результаты отказа.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Потребитель может отличить завершённую операцию от операции,
+                результат которой ещё формируется.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <BOUNDARY>
+            <RULE>
+                Требования не определяют конкретный транспорт, протокол,
+                формат сериализации или программный интерфейс передачи.
+            </RULE>
+            <RULE>
+                Требования не устанавливают обязательную синхронную
+                или асинхронную модель взаимодействия.
+            </RULE>
+            <RULE>
+                Требования не определяют подтверждение получения, повторную доставку,
+                дедупликацию, очереди и гарантии exactly-once.
+            </RULE>
+            <RULE>
+                Требования не определяют маршрутизацию результатов между несколькими
+                потребителями и управление подписками.
+            </RULE>
+            <RULE>
+                Компонент не принимает решение о том, какой потребитель должен получить
+                наблюдение, если адресат не задан внешним контекстом.
+            </RULE>
+        </BOUNDARY>
+
+        <LINKS>
+            <PROJECT_GOAL ref="GOAL-PERCEPTION-001" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
+            <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+            <ENTITY ref="ENT-OBSERVATION" />
+            <ENTITY ref="ENT-PERCEPTION-FAILURE" />
+            <INVARIANT ref="INV-PERCEPTION-TRACEABILITY" />
+            <INVARIANT ref="INV-PERCEPTION-PARTIALITY" />
+            <INVARIANT ref="INV-PERCEPTION-OUTCOME-HONESTY" />
+        </LINKS>
+    </FUNCTIONAL_REQUIREMENTS>
 </REQUIREMENTS_ANALYSIS>
