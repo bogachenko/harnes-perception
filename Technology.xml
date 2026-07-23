@@ -139,6 +139,24 @@
         </TRACES_TO>
     </SECURITY>
 
+    <INTEGRATION_INTERFACE id="TECH-IN-PROCESS-GO-API">
+        <MECHANISM>PUBLIC_GO_API</MECHANISM>
+        <PROCESS_BOUNDARY>IN_PROCESS</PROCESS_BOUNDARY>
+        <INPUT_FORMAT ref="TECH-FORMAT-INPUT-EVENT" />
+        <OUTPUT_FORMAT ref="TECH-FORMAT-CANONICAL-OBSERVATION" />
+        <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+        <RATIONALE>
+            harnes-perception вызывается через публичный Go API
+            внутри того же процесса.
+        </RATIONALE>
+        <TRACES_TO>
+            <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
+            <ACTOR ref="ACTOR-CALLING-COMPONENT" />
+            <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
+            <USE_CASE ref="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
+        </TRACES_TO>
+    </INTEGRATION_INTERFACE>
+
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
