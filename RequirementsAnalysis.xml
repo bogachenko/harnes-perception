@@ -691,4 +691,160 @@
             <INVARIANT ref="INV-PERCEPTION-TIME-SEPARATION" />
         </LINKS>
     </FUNCTIONAL_REQUIREMENTS>
+
+    <FUNCTIONAL_REQUIREMENTS id="FRG-PERCEPTION-TRANSFORMATION" status="APPROVED_BY_OWNER">
+        <NAME>Техническое преобразование и извлечение содержимого</NAME>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-001" priority="MUST">
+            <NAME>Выбор применимых преобразований</NAME>
+            <STATEMENT>
+                Компонент должен определять применимые технические преобразования
+                на основании доступных характеристик входа и заявленных возможностей
+                зарегистрированных обработчиков.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                К входу применяются только преобразования, заявившие поддержку
+                соответствующего представления и условий обработки.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-002" priority="MUST">
+            <NAME>Запрет необоснованного выбора обработчика</NAME>
+            <STATEMENT>
+                Компонент не должен выбирать преобразование на основании неподтверждённого
+                предположения о типе, формате или содержимом входа.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Если применимый обработчик невозможно определить, операция завершается
+                типизированным результатом невозможности обработки.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-003" priority="MUST">
+            <NAME>Создание производных представлений</NAME>
+            <STATEMENT>
+                Результат каждого преобразования должен создаваться как новое производное
+                представление, отличимое от исходного входа и предыдущих представлений.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Исходный вход не перезаписывается, а каждое изменённое представление
+                сохраняет связь с непосредственным предшественником.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-004" priority="MUST">
+            <NAME>Регистрация выполненного преобразования</NAME>
+            <STATEMENT>
+                Для каждого преобразования компонент должен создать запись,
+                идентифицирующую выполненное действие и связывающую входное
+                и полученное представления.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Для любого производного представления можно определить,
+                каким преобразованием и в рамках какой операции оно было получено.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-005" priority="MUST">
+            <NAME>Фиксация существенных условий преобразования</NAME>
+            <STATEMENT>
+                Запись преобразования должна содержать доступные сведения,
+                необходимые для различения применённого обработчика, его версии,
+                режима и существенных параметров обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Результаты разных обработчиков, версий или режимов не представлены
+                как результат одного неразличимого преобразования.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-006" priority="MUST">
+            <NAME>Явное представление вероятностного результата</NAME>
+            <STATEMENT>
+                Если преобразование является вероятностным, его результат должен
+                содержать все предоставленные обработчиком показатели уверенности,
+                качества или неопределённости.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Вероятностный результат отличим от детерминированно извлечённого
+                значения и не обозначается как подтверждённый факт.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-007" priority="MUST">
+            <NAME>Явное представление частичного результата</NAME>
+            <STATEMENT>
+                Если преобразование завершено только для части входа или извлекло
+                только часть доступного либо ожидаемого содержимого, результат должен
+                быть обозначен как частичный.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Потребитель может отличить полный результат преобразования
+                от частичного результата.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-008" priority="MUST">
+            <NAME>Сохранение нескольких извлечённых представлений</NAME>
+            <STATEMENT>
+                Одно преобразование может выпускать несколько самостоятельных
+                производных представлений, если каждое из них непосредственно
+                извлечено из обрабатываемого входа.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Каждое выпущенное представление имеет отдельную идентичность
+                и собственную связь с записью преобразования.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-TRANSFORMATION-009" priority="MUST">
+            <NAME>Явный результат невозможности преобразования</NAME>
+            <STATEMENT>
+                Ошибка обработчика, неподдерживаемое содержимое, невозможность декодирования
+                или отсутствие пригодного результата должны быть представлены
+                типизированным результатом невозможности обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Неуспешное преобразование не создаёт фиктивное, пустое
+                или заведомо недостоверное успешное представление.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <BOUNDARY>
+            <RULE>
+                Требования не определяют конкретные алгоритмы, модели машинного обучения,
+                библиотеки, исполняемые среды или внешние сервисы преобразования.
+            </RULE>
+            <RULE>
+                Требования не устанавливают конкретную последовательность обработчиков
+                для отдельных форматов и модальностей.
+            </RULE>
+            <RULE>
+                Требования не определяют программную структуру производного представления
+                или записи преобразования.
+            </RULE>
+            <RULE>
+                Требования не определяют каноническую структуру наблюдения
+                и правила его доставки потребителю.
+            </RULE>
+            <RULE>
+                Преобразование не включает оценку истинности, значимости
+                или смысла извлечённого содержания.
+            </RULE>
+        </BOUNDARY>
+
+        <LINKS>
+            <PROJECT_GOAL ref="GOAL-PERCEPTION-001" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
+            <ENTITY ref="ENT-PERCEPTION-INPUT" />
+            <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+            <ENTITY ref="ENT-TRANSFORMATION-RECORD" />
+            <ENTITY ref="ENT-PERCEPTION-FAILURE" />
+            <INVARIANT ref="INV-PERCEPTION-INPUT-INTEGRITY" />
+            <INVARIANT ref="INV-PERCEPTION-TRANSFORMATION-HISTORY" />
+            <INVARIANT ref="INV-PERCEPTION-UNCERTAINTY-HONESTY" />
+            <INVARIANT ref="INV-PERCEPTION-PARTIALITY" />
+            <INVARIANT ref="INV-PERCEPTION-OUTCOME-HONESTY" />
+        </LINKS>
+    </FUNCTIONAL_REQUIREMENTS>
 </REQUIREMENTS_ANALYSIS>
