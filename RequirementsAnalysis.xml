@@ -22,4 +22,57 @@
             <CRITERION>Наблюдение может быть передано следующему компоненту без обязательного долговременного сохранения.</CRITERION>
         </SUCCESS_CRITERIA>
     </PROJECT_GOAL>
+
+    <ACTORS status="APPROVED_BY_OWNER">
+        <ACTOR id="ACTOR-PERCEPTION-CONSUMER">
+            <NAME>Потребитель наблюдений</NAME>
+            <DESCRIPTION>
+                Программная система или компонент, который передаёт запрос на обработку
+                внешних данных и получает канонические наблюдения.
+            </DESCRIPTION>
+            <INTERACTION_GOAL>
+                Получить технически преобразованное и нормализованное представление входных
+                данных без необходимости самостоятельно работать с конкретным транспортом,
+                форматом или модальностью.
+            </INTERACTION_GOAL>
+        </ACTOR>
+
+        <ACTOR id="ACTOR-DATA-SOURCE">
+            <NAME>Источник данных</NAME>
+            <DESCRIPTION>
+                Внешняя система, устройство, ресурс или канал, предоставляющий исходные данные
+                для восприятия.
+            </DESCRIPTION>
+            <EXAMPLES>
+                <EXAMPLE>MCP Resource</EXAMPLE>
+                <EXAMPLE>API</EXAMPLE>
+                <EXAMPLE>Webhook</EXAMPLE>
+                <EXAMPLE>Очередь сообщений</EXAMPLE>
+                <EXAMPLE>Файл</EXAMPLE>
+                <EXAMPLE>Камера</EXAMPLE>
+                <EXAMPLE>Микрофон</EXAMPLE>
+                <EXAMPLE>Датчик</EXAMPLE>
+                <EXAMPLE>Поток телеметрии</EXAMPLE>
+            </EXAMPLES>
+            <INTERACTION_GOAL>
+                Передать исходный сигнал или данные в доступной технической форме.
+            </INTERACTION_GOAL>
+        </ACTOR>
+
+        <ACTOR_BOUNDARY>
+            <RULE>
+                Человек не выделяется отдельным актором, если он только является автором текста,
+                изображения или команды.
+            </RULE>
+            <RULE>
+                Система памяти, система внимания, ассоциативная система, планировщик, система
+                действий и Harness не выделяются отдельными акторами на этом шаге и входят в роль
+                ACTOR-PERCEPTION-CONSUMER, если потребляют результат компонента.
+            </RULE>
+            <RULE>
+                Администратор или интегратор не выделяются отдельными акторами, пока не установлены
+                требования к настройке и управлению системой.
+            </RULE>
+        </ACTOR_BOUNDARY>
+    </ACTORS>
 </REQUIREMENTS_ANALYSIS>
