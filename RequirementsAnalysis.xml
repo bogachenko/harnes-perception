@@ -270,6 +270,12 @@
 
     <STATE_MODEL id="STATE-MODEL-PERCEPTION-INPUT-EVENT"
                  subject_ref="INPUT-EXTERNAL-EVENT">
+        <SCOPE>
+            Модель описывает только входные события, которые успешно прошли
+            проверку степени важности и были помещены в очередь. События,
+            отклонённые до помещения в очередь, в модель не входят.
+        </SCOPE>
+
         <INITIAL_STATE ref="STATE-PERCEPTION-QUEUED" />
         <FINAL_STATE ref="STATE-PERCEPTION-PROCESSED" />
 
