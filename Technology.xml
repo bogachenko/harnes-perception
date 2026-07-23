@@ -172,7 +172,13 @@
 
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
+        <COMPONENT_FORM>GO_PACKAGE</COMPONENT_FORM>
+        <INTEGRATION_MODE>EMBEDDED_IN_CALLING_APPLICATION</INTEGRATION_MODE>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+        <RATIONALE>
+            harnes-perception поставляется как Go package
+            и встраивается в вызывающее приложение.
+        </RATIONALE>
         <LANGUAGE ref="TECH-LANGUAGE-GO" />
     </MODULE_IDENTITY>
 </TECHNOLOGY>
