@@ -109,15 +109,29 @@
             до передачи события в harnes-perception.
         </REQUIREMENT>
 
+        <REQUIREMENT id="REQ-PERCEPTION-NOISE-EXCLUDED">
+            Шум не является входным событием и не передаётся
+            в harnes-perception.
+        </REQUIREMENT>
+
+        <REQUIREMENT id="REQ-PERCEPTION-IMPORTANCE-LEVELS">
+            Допустимыми значениями степени важности являются только low, medium
+            и high. Значение «low» обозначает значимое событие без требования
+            к моменту обработки. Значение «medium» обозначает значимое событие,
+            которое требуется обработать максимально быстро. Значение «high»
+            обозначает срочное критическое событие, которое требуется
+            обрабатывать немедленно.
+        </REQUIREMENT>
+
         <REQUIREMENT id="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH">
             harnes-perception включает полученную степень важности в
             каноническое наблюдение без изменения.
         </REQUIREMENT>
 
         <REQUIREMENT id="REQ-PERCEPTION-IMPORTANCE-ORDER">
-            При выборе следующего входного события для обработки
-            harnes-perception отдаёт приоритет событию с более высокой
-            степенью важности.
+            Порядок степеней важности: low &lt; medium &lt; high. При выборе
+            следующего входного события harnes-perception отдаёт приоритет
+            событию с более высокой степенью важности.
         </REQUIREMENT>
 
         <REQUIREMENT id="REQ-PERCEPTION-EQUAL-IMPORTANCE-ORDER">
@@ -154,6 +168,15 @@
         </REQUIREMENT>
     </REQUIREMENTS>
 
+    <CONSTRAINTS>
+        <CONSTRAINT id="CONSTRAINT-PERCEPTION-NO-NUMERIC-SLA">
+            Для степеней важности не устанавливается гарантированное максимальное
+            время начала или завершения обработки. Срочность определяется только
+            очерёдностью и полной отменой текущей обработки при поступлении
+            события с более высокой степенью важности.
+        </CONSTRAINT>
+    </CONSTRAINTS>
+
     <CORRECT_RESULT_CRITERIA>
         <CRITERION id="CRITERION-PERCEPTION-SUCCESS">
             При успешной обработке входного события вызывающему компоненту
@@ -163,9 +186,19 @@
             Входное событие удаляется из очереди.
         </CRITERION>
 
+        <CRITERION id="CRITERION-PERCEPTION-NOISE-EXCLUDED">
+            Шум не формирует входное событие и не помещается
+            в очередь обработки.
+        </CRITERION>
+
+        <CRITERION id="CRITERION-PERCEPTION-IMPORTANCE-LEVELS">
+            Каждое входное событие, помещённое в очередь, имеет степень важности
+            low, medium или high.
+        </CRITERION>
+
         <CRITERION id="CRITERION-PERCEPTION-IMPORTANCE-ORDER">
-            При выборе следующего события раньше выбирается событие с более высокой
-            степенью важности.
+            Порядок выбора событий по степени важности соответствует
+            low &lt; medium &lt; high.
         </CRITERION>
 
         <CRITERION id="CRITERION-PERCEPTION-EQUAL-IMPORTANCE-ORDER">
@@ -373,6 +406,12 @@
         <LINK from="REQ-PERCEPTION-IMPORTANCE-SOURCE"
               relation="GOVERNS"
               to="STEP-RECEIVE-EVENT" />
+        <LINK from="REQ-PERCEPTION-NOISE-EXCLUDED"
+              relation="GOVERNS"
+              to="STEP-RECEIVE-EVENT" />
+        <LINK from="REQ-PERCEPTION-IMPORTANCE-LEVELS"
+              relation="GOVERNS"
+              to="STEP-RECEIVE-EVENT" />
         <LINK from="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH"
               relation="GOVERNS"
               to="STEP-FORM-OBSERVATION" />
@@ -394,6 +433,12 @@
         <LINK from="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION"
               relation="GOVERNS"
               to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+        <LINK from="CONSTRAINT-PERCEPTION-NO-NUMERIC-SLA"
+              relation="APPLIES_TO"
+              to="REQ-PERCEPTION-IMPORTANCE-ORDER" />
+        <LINK from="CONSTRAINT-PERCEPTION-NO-NUMERIC-SLA"
+              relation="APPLIES_TO"
+              to="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
 
         <LINK from="INV-PERCEPTION-IMPORTANCE-UNCHANGED"
               relation="APPLIES_TO"
@@ -440,6 +485,13 @@
         <LINK from="CRITERION-PERCEPTION-SUCCESS"
               relation="VERIFIES"
               to="INV-PERCEPTION-REMOVAL-CONDITIONS" />
+
+        <LINK from="CRITERION-PERCEPTION-NOISE-EXCLUDED"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-NOISE-EXCLUDED" />
+        <LINK from="CRITERION-PERCEPTION-IMPORTANCE-LEVELS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-IMPORTANCE-LEVELS" />
 
         <LINK from="CRITERION-PERCEPTION-IMPORTANCE-ORDER"
               relation="VERIFIES"
