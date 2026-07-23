@@ -75,4 +75,40 @@
             </RULE>
         </ACTOR_BOUNDARY>
     </ACTORS>
+
+    <AAG_SCENARIOS>
+        <AAG_SCENARIO id="AAG-PERCEPTION-001" status="APPROVED_BY_OWNER">
+            <NAME>Получение канонического наблюдения по запросу</NAME>
+
+            <ACTOR ref="ACTOR-PERCEPTION-CONSUMER" />
+
+            <ACTION>
+                Передать поддерживаемые внешние данные либо доступную ссылку на них
+                и запросить техническое преобразование.
+            </ACTION>
+
+            <GOAL>
+                Получить каноническое наблюдение, пригодное для дальнейшей обработки
+                другими компонентами.
+            </GOAL>
+
+            <SUCCESS_RESULT>
+                Потребитель получает наблюдение, сохраняющее связь с исходными данными
+                и явно представляющее результат выполненного преобразования.
+            </SUCCESS_RESULT>
+
+            <BOUNDARY>
+                <RULE>Сценарий не включает оценку важности наблюдения.</RULE>
+                <RULE>Сценарий не включает интерпретацию относительно целей или модели мира.</RULE>
+                <RULE>Сценарий не включает решение о долговременном сохранении.</RULE>
+                <RULE>Сценарий не включает планирование последующих действий.</RULE>
+            </BOUNDARY>
+
+            <LINKS>
+                <PROJECT_GOAL ref="GOAL-PERCEPTION-001" />
+                <USES_ACTOR ref="ACTOR-PERCEPTION-CONSUMER" />
+                <RECEIVES_FROM ref="ACTOR-DATA-SOURCE" />
+            </LINKS>
+        </AAG_SCENARIO>
+    </AAG_SCENARIOS>
 </REQUIREMENTS_ANALYSIS>
