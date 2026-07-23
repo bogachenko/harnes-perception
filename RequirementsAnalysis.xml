@@ -51,6 +51,28 @@
         </ENTITY>
     </ENTITIES>
 
+    <INVARIANTS>
+        <INVARIANT id="INV-PERCEPTION-IMPORTANCE-UNCHANGED">
+            Степень важности канонического наблюдения равна степени важности,
+            полученной вместе с соответствующим входным событием.
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-ARRIVAL-TIME-UNCHANGED">
+            Время первоначального поступления события не изменяется при отмене
+            обработки, возвращении события в очередь и повторной обработке.
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-NO-PARTIAL-OBSERVATION">
+            Незавершённая или полностью отменённая обработка не создаёт
+            канонического наблюдения.
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-REMOVE-AFTER-DELIVERY">
+            Входное событие удаляется из очереди только после успешного
+            формирования и передачи канонического наблюдения.
+        </INVARIANT>
+    </INVARIANTS>
+
     <REQUIREMENTS>
         <REQUIREMENT id="REQ-PERCEPTION-IMPORTANCE-SOURCE">
             Степень важности входного события определяется внешним источником
