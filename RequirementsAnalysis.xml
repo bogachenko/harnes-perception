@@ -399,4 +399,163 @@
             <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
         </LINKS>
     </DOMAIN_ENTITIES>
+
+    <DOMAIN_INVARIANTS status="APPROVED_BY_OWNER">
+        <INVARIANT id="INV-PERCEPTION-TRACEABILITY">
+            <NAME>Полная прослеживаемость результата</NAME>
+            <RULE>
+                Каждое каноническое наблюдение и каждый результат невозможности обработки
+                должны быть связаны с породившей их операцией восприятия.
+                Каждая операция должна быть связана с обработанным входом.
+            </RULE>
+            <RATIONALE>
+                Результат нельзя рассматривать отдельно от конкретной обработки,
+                в ходе которой он был получен.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-PERCEPTION-INPUT" />
+                <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+                <ENTITY ref="ENT-OBSERVATION" />
+                <ENTITY ref="ENT-PERCEPTION-FAILURE" />
+            </LINKS>
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-SOURCE-PROVENANCE">
+            <NAME>Явное происхождение входа</NAME>
+            <RULE>
+                Для каждого входа должны быть сохранены все доступные сведения
+                о его источнике и исходном событии.
+                Отсутствующие или неизвестные сведения должны быть обозначены явно,
+                а не восстановлены предположением.
+            </RULE>
+            <RATIONALE>
+                Компонент не должен создавать ложную видимость известного происхождения данных.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-DATA-SOURCE" />
+                <ENTITY ref="ENT-PERCEPTION-INPUT" />
+            </LINKS>
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-INPUT-INTEGRITY">
+            <NAME>Неизменность исходного входа</NAME>
+            <RULE>
+                Технические преобразования не должны молча изменять представление,
+                которое считается исходным входом.
+                Изменённые данные должны рассматриваться как производные представления.
+            </RULE>
+            <RATIONALE>
+                Должна сохраняться возможность различить полученные данные
+                и результаты их преобразования.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-PERCEPTION-INPUT" />
+                <ENTITY ref="ENT-TRANSFORMATION-RECORD" />
+            </LINKS>
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-TRANSFORMATION-HISTORY">
+            <NAME>Явность преобразований</NAME>
+            <RULE>
+                Каждое наблюдение должно содержать или однозначно ссылаться
+                на сведения о технических преобразованиях, повлиявших на его содержание.
+            </RULE>
+            <RATIONALE>
+                Потребитель должен отличать непосредственно полученные данные
+                от декодированных, распознанных, нормализованных или иных производных результатов.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-TRANSFORMATION-RECORD" />
+                <ENTITY ref="ENT-OBSERVATION" />
+            </LINKS>
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-UNCERTAINTY-HONESTY">
+            <NAME>Неподмена неопределённого результата фактом</NAME>
+            <RULE>
+                Результат вероятностного, неполного или неоднозначного преобразования
+                должен явно содержать доступные сведения о неопределённости, качестве
+                и полноте и не должен обозначаться как подтверждённый факт.
+            </RULE>
+            <RATIONALE>
+                Компонент сообщает результат технического извлечения,
+                но не устанавливает объективную истинность содержания.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-OBSERVATION" />
+                <ENTITY ref="ENT-TRANSFORMATION-RECORD" />
+            </LINKS>
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-PARTIALITY">
+            <NAME>Явность частичного результата</NAME>
+            <RULE>
+                Если из входа удалось извлечь только часть доступного или ожидаемого
+                содержания, выпущенное наблюдение должно быть явно обозначено как неполное.
+            </RULE>
+            <RATIONALE>
+                Частичный успешный результат не должен создавать впечатление
+                полного преобразования входа.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-OBSERVATION" />
+            </LINKS>
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-OUTCOME-HONESTY">
+            <NAME>Отказ не маскируется под наблюдение</NAME>
+            <RULE>
+                Если операция не смогла выпустить каноническое наблюдение,
+                она должна завершиться типизированным результатом невозможности обработки.
+                Пустое, фиктивное или заведомо недостоверное наблюдение не является заменой отказа.
+            </RULE>
+            <RATIONALE>
+                Потребитель должен однозначно различать успешное преобразование
+                и невозможность получить результат.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+                <ENTITY ref="ENT-OBSERVATION" />
+                <ENTITY ref="ENT-PERCEPTION-FAILURE" />
+            </LINKS>
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-OPERATION-IDENTITY">
+            <NAME>Самостоятельность каждой операции</NAME>
+            <RULE>
+                Каждая операция восприятия должна иметь собственную идентичность.
+                Повторная обработка того же входа является новой операцией
+                и не должна неявно переписывать результат предыдущей.
+            </RULE>
+            <RATIONALE>
+                Разные попытки обработки могут использовать разные условия
+                и получать разные результаты.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+            </LINKS>
+        </INVARIANT>
+
+        <INVARIANT id="INV-PERCEPTION-TIME-SEPARATION">
+            <NAME>Разделение временных характеристик</NAME>
+            <RULE>
+                Время исходного события, время поступления входа и время выполнения
+                преобразования не должны подменять друг друга.
+                Неизвестное или приблизительное время должно обозначаться явно.
+            </RULE>
+            <RATIONALE>
+                Различные временные характеристики описывают разные этапы происхождения наблюдения.
+            </RATIONALE>
+            <LINKS>
+                <ENTITY ref="ENT-PERCEPTION-INPUT" />
+                <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+                <ENTITY ref="ENT-OBSERVATION" />
+            </LINKS>
+        </INVARIANT>
+
+        <LINKS>
+            <PROJECT_GOAL ref="GOAL-PERCEPTION-001" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
+        </LINKS>
+    </DOMAIN_INVARIANTS>
 </REQUIREMENTS_ANALYSIS>
