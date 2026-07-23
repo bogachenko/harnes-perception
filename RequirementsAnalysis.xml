@@ -7,7 +7,7 @@
         без дополнения их смысла, ID внешнего источника и timestamp момента
         поступления события в harnes-perception. Если входное событие содержит
         файловый артефакт, harnes-perception создаёт ссылку на него и включает
-        её в каноническое наблюдение для возврата вызывающему компоненту.
+        её в каноническое наблюдение для возврата оркестратору Google ADK Go.
     </PROJECT_GOAL>
 
     <ACTORS>
@@ -18,9 +18,9 @@
             данных и до передачи определяет степень важности входного события.
         </ACTOR>
 
-        <ACTOR id="ACTOR-CALLING-COMPONENT">
-            Вызывающий компонент получает каноническое наблюдение,
-            возвращённое harnes-perception.
+        <ACTOR id="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR">
+            Оркестратор Google ADK Go получает каноническое наблюдение,
+            сформированное harnes-perception.
         </ACTOR>
     </ACTORS>
 
@@ -80,8 +80,8 @@
 
         <INVARIANT id="INV-PERCEPTION-REMOVAL-CONDITIONS">
             Входное событие удаляется из очереди либо сразу после успешного
-            формирования канонического наблюдения, возвращаемого вызывающему
-            компоненту, либо если обработка завершилась ошибкой
+            формирования канонического наблюдения, возвращаемого оркестратору
+            Google ADK Go, либо если обработка завершилась ошибкой
             до формирования канонического наблюдения.
         </INVARIANT>
     </INVARIANTS>
@@ -217,7 +217,7 @@
 
     <CORRECT_RESULT_CRITERIA>
         <CRITERION id="CRITERION-PERCEPTION-SUCCESS">
-            При успешной обработке входного события вызывающему компоненту
+            При успешной обработке входного события оркестратору Google ADK Go
             возвращается каноническое наблюдение, содержащее нормализованные исходные
             данные, приведённые к единому представлению без дополнения их смысла,
             ID внешнего источника, timestamp момента поступления события
@@ -289,7 +289,7 @@
         </USE_CASE>
 
         <USE_CASE id="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION">
-            <ACTOR ref="ACTOR-CALLING-COMPONENT" />
+            <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
             <ACTION>
                 Получить каноническое наблюдение, возвращённое harnes-perception.
             </ACTION>
@@ -325,7 +325,7 @@
 
             <STATE id="STATE-PERCEPTION-PROCESSED">
                 Каноническое наблюдение успешно сформировано и возвращено
-                вызывающему компоненту. Событие удалено из очереди.
+                оркестратору Google ADK Go. Событие удалено из очереди.
             </STATE>
         </STATES>
 
@@ -360,7 +360,7 @@
                 <TO ref="STATE-PERCEPTION-PROCESSED" />
                 <CONDITION>
                     Каноническое наблюдение успешно сформировано и возвращено
-                    вызывающему компоненту.
+                    оркестратору Google ADK Go.
                 </CONDITION>
                 <EFFECT>
                     Событие удаляется из очереди.
@@ -420,8 +420,8 @@
         </STEP>
 
         <STEP order="8" id="STEP-RETURN-OBSERVATION">
-            Вернуть каноническое наблюдение вызывающему компоненту
-            и удалить входное событие из очереди.
+            Вернуть каноническое наблюдение оркестратору Google ADK Go и удалить
+            входное событие из очереди.
         </STEP>
     </BUSINESS_PROCESS>
 
@@ -429,7 +429,7 @@
         <LINK from="ACTOR-EXTERNAL-SOURCE"
               relation="PERFORMS"
               to="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
-        <LINK from="ACTOR-CALLING-COMPONENT"
+        <LINK from="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR"
               relation="PERFORMS"
               to="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
 
