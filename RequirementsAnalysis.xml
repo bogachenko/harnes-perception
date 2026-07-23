@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<REQUIREMENTS_ANALYSIS id="RA-HARNES-PERCEPTION" status="APPROVED_BY_OWNER">
+<REQUIREMENTS_ANALYSIS id="RA-HARNES-PERCEPTION" status="DRAFT">
     <PROJECT_GOAL id="GOAL-PERCEPTION-001">
         Принимать внешний сигнал или уже сформированный внешним источником
         пакет данных и формировать каноническое наблюдение, содержащее
@@ -7,8 +7,11 @@
         без дополнения их смысла, ID внешнего источника и timestamp момента
         поступления события в harnes-perception. Если входное событие содержит
         один или несколько файловых артефактов, harnes-perception создаёт
-        ссылку на каждый из них и включает эти ссылки в каноническое наблюдение
-        для возврата оркестратору Google ADK Go.
+        ссылку на каждый из них и включает эти ссылки в каноническое наблюдение.
+        После формирования наблюдения соответствующее событие переходит в состояние
+        READY и остаётся в единой очереди harnes-perception до самостоятельного
+        вызова Next() внешним оркестратором Google ADK Go. В ответ на этот вызов
+        harnes-perception возвращает готовое каноническое наблюдение.
     </PROJECT_GOAL>
 
     <ACTORS>
@@ -20,8 +23,11 @@
         </ACTOR>
 
         <ACTOR id="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR">
-            Оркестратор Google ADK Go получает каноническое наблюдение,
-            сформированное harnes-perception.
+            Оркестратор Google ADK Go является внешним по отношению
+            к harnes-perception компонентом. Когда оркестратор готов принять
+            следующее наблюдение, он самостоятельно вызывает Next() и получает
+            готовое каноническое наблюдение. harnes-perception не инициирует
+            взаимодействие с оркестратором и не контролирует его.
         </ACTOR>
     </ACTORS>
 
@@ -41,7 +47,8 @@
             в harnes-perception и полученную степень важности без изменения.
             Если входное событие содержит один или несколько файловых артефактов,
             наблюдение также содержит созданную harnes-perception ссылку на каждый
-            из них.
+            из них. Готовое каноническое наблюдение возвращается внешнему оркестратору
+            Google ADK Go в ответ на самостоятельный вызов Next().
         </OUTPUT>
     </OUTPUTS>
 
@@ -60,6 +67,8 @@
             и полученную степень важности без изменения. Если входное событие
             содержит один или несколько файловых артефактов, наблюдение также
             содержит созданную harnes-perception ссылку на каждый из них.
+            После формирования наблюдение связано с событием в состоянии READY
+            до его успешной выдачи внешнему оркестратору по вызову Next().
         </ENTITY>
     </ENTITIES>
 
@@ -79,10 +88,17 @@
             канонического наблюдения.
         </INVARIANT>
 
+        <INVARIANT id="INV-PERCEPTION-READY-RETAINED">
+            После успешного формирования канонического наблюдения событие
+            и сформированное наблюдение остаются в состоянии READY в единой
+            очереди harnes-perception до успешной выдачи наблюдения внешнему
+            оркестратору Google ADK Go в ответ на вызов Next().
+        </INVARIANT>
+
         <INVARIANT id="INV-PERCEPTION-REMOVAL-CONDITIONS">
-            Входное событие удаляется из очереди либо сразу после успешного
-            формирования канонического наблюдения, возвращаемого оркестратору
-            Google ADK Go, либо если обработка завершилась ошибкой
+            Входное событие удаляется из единой очереди либо после успешной
+            выдачи готового канонического наблюдения оркестратору Google ADK Go
+            в ответ на вызов Next(), либо если обработка завершилась ошибкой
             до формирования канонического наблюдения.
         </INVARIANT>
     </INVARIANTS>
@@ -211,6 +227,30 @@
             поступления более важного события, остаётся в очереди. При
             последующем выборе этого события его обработка начинается заново.
         </REQUIREMENT>
+
+        <REQUIREMENT id="REQ-PERCEPTION-SINGLE-QUEUE">
+            harnes-perception хранит принятые события в одной общей очереди.
+            Состояние READY является состоянием события в этой очереди;
+            отдельная очередь готовых наблюдений не создаётся.
+        </REQUIREMENT>
+
+        <REQUIREMENT id="REQ-PERCEPTION-READY-RETENTION">
+            После успешного формирования канонического наблюдения соответствующее
+            событие переходит в состояние READY и вместе с готовым наблюдением
+            остаётся в единой очереди до успешной выдачи наблюдения оркестратору.
+        </REQUIREMENT>
+
+        <REQUIREMENT id="REQ-PERCEPTION-NEXT-PULL">
+            Когда оркестратор Google ADK Go готов принять следующее наблюдение,
+            он самостоятельно вызывает Next(). В ответ harnes-perception
+            возвращает готовое каноническое наблюдение.
+        </REQUIREMENT>
+
+        <REQUIREMENT id="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE">
+            Оркестратор Google ADK Go не является частью harnes-perception.
+            harnes-perception не инициирует вызовы оркестратора, не управляет
+            им и не контролирует его готовность.
+        </REQUIREMENT>
     </REQUIREMENTS>
 
     <CONSTRAINTS>
@@ -224,15 +264,17 @@
 
     <CORRECT_RESULT_CRITERIA>
         <CRITERION id="CRITERION-PERCEPTION-SUCCESS">
-            При успешной обработке входного события оркестратору Google ADK Go
-            возвращается каноническое наблюдение, содержащее нормализованные исходные
-            данные, приведённые к единому представлению без дополнения их смысла,
-            ID внешнего источника, timestamp момента поступления события
-            в harnes-perception и полученную степень важности без изменения.
-            Если входное событие содержит один или несколько файловых артефактов,
-            наблюдение содержит созданную harnes-perception ссылку на каждый из них;
-            если файловых артефактов нет, ссылки не включаются. Входное событие
-            удаляется из очереди.
+            При успешной обработке входного события формируется каноническое
+            наблюдение, содержащее нормализованные исходные данные, приведённые
+            к единому представлению без дополнения их смысла, ID внешнего источника,
+            timestamp момента поступления события в harnes-perception и полученную
+            степень важности без изменения. Если входное событие содержит один
+            или несколько файловых артефактов, наблюдение содержит созданную
+            harnes-perception ссылку на каждый из них; если файловых артефактов нет,
+            ссылки не включаются. Событие переходит в состояние READY и остаётся
+            в единой очереди. Когда внешний оркестратор Google ADK Go самостоятельно
+            вызывает Next(), harnes-perception возвращает готовое наблюдение
+            и после успешной выдачи удаляет событие из очереди.
         </CRITERION>
 
         <CRITERION id="CRITERION-PERCEPTION-NOISE-EXCLUDED">
@@ -299,11 +341,13 @@
         <USE_CASE id="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION">
             <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
             <ACTION>
-                Получить каноническое наблюдение, возвращённое harnes-perception.
+                Когда оркестратор готов принять следующее наблюдение,
+                самостоятельно вызвать Next() и получить готовое каноническое
+                наблюдение, возвращённое harnes-perception.
             </ACTION>
             <GOAL>
-                Получить результат обработки входного события в форме
-                канонического наблюдения.
+                Получить готовый результат обработки входного события без
+                инициирования взаимодействия со стороны harnes-perception.
             </GOAL>
         </USE_CASE>
     </USE_CASES>
@@ -312,11 +356,13 @@
                  subject_ref="INPUT-EXTERNAL-EVENT">
         <SCOPE>
             Модель описывает только входные события, которые успешно прошли
-            проверку степени важности и были помещены в очередь. События,
-            отклонённые до помещения в очередь, в модель не входят. Если обработка
-            завершается ошибкой до формирования канонического наблюдения, событие
-            удаляется из очереди, после чего модель перестаёт применяться к нему.
-            Отдельное постоянное ошибочное состояние не создаётся.
+            проверку степени важности и были помещены в единую очередь. События,
+            отклонённые до помещения в очередь, в модель не входят. После успешного
+            формирования канонического наблюдения событие остаётся в этой очереди
+            в состоянии READY до успешной выдачи наблюдения по вызову Next().
+            Если обработка завершается ошибкой до формирования канонического
+            наблюдения, событие удаляется из очереди, после чего модель перестаёт
+            применяться к нему. Отдельное постоянное ошибочное состояние не создаётся.
         </SCOPE>
 
         <INITIAL_STATE ref="STATE-PERCEPTION-QUEUED" />
@@ -331,9 +377,16 @@
                 Событие выбрано из очереди и обрабатывается атомарно.
             </STATE>
 
+            <STATE id="STATE-PERCEPTION-READY">
+                Каноническое наблюдение успешно сформировано. Событие и готовое
+                наблюдение остаются в единой очереди до вызова Next() внешним
+                оркестратором Google ADK Go.
+            </STATE>
+
             <STATE id="STATE-PERCEPTION-PROCESSED">
-                Каноническое наблюдение успешно сформировано и возвращено
-                оркестратору Google ADK Go. Событие удалено из очереди.
+                Готовое каноническое наблюдение успешно возвращено внешнему
+                оркестратору Google ADK Go в ответ на вызов Next().
+                Событие удалено из очереди.
             </STATE>
         </STATES>
 
@@ -363,15 +416,27 @@
                 </EFFECT>
             </TRANSITION>
 
-            <TRANSITION id="TRANSITION-PERCEPTION-PROCESSING-TO-PROCESSED">
+            <TRANSITION id="TRANSITION-PERCEPTION-PROCESSING-TO-READY">
                 <FROM ref="STATE-PERCEPTION-PROCESSING" />
-                <TO ref="STATE-PERCEPTION-PROCESSED" />
+                <TO ref="STATE-PERCEPTION-READY" />
                 <CONDITION>
-                    Каноническое наблюдение успешно сформировано и возвращено
-                    оркестратору Google ADK Go.
+                    Каноническое наблюдение успешно сформировано.
                 </CONDITION>
                 <EFFECT>
-                    Событие удаляется из очереди.
+                    Событие и готовое наблюдение остаются в единой очереди
+                    harnes-perception в состоянии READY.
+                </EFFECT>
+            </TRANSITION>
+
+            <TRANSITION id="TRANSITION-PERCEPTION-READY-TO-PROCESSED">
+                <FROM ref="STATE-PERCEPTION-READY" />
+                <TO ref="STATE-PERCEPTION-PROCESSED" />
+                <CONDITION>
+                    Внешний оркестратор Google ADK Go самостоятельно вызвал Next(),
+                    и harnes-perception успешно вернул готовое каноническое наблюдение.
+                </CONDITION>
+                <EFFECT>
+                    Событие удаляется из единой очереди.
                 </EFFECT>
             </TRANSITION>
         </TRANSITIONS>
@@ -427,12 +492,16 @@
             timestamp момента поступления события в harnes-perception
             и полученной степенью важности без изменения. Если входное событие
             содержит один или несколько файловых артефактов, включить ссылки
-            на каждый из них в каноническое наблюдение.
+            на каждый из них в каноническое наблюдение. Перевести событие
+            в состояние READY и оставить его вместе с готовым наблюдением
+            в единой очереди harnes-perception.
         </STEP>
 
         <STEP order="9" id="STEP-RETURN-OBSERVATION">
-            Вернуть каноническое наблюдение оркестратору Google ADK Go и удалить
-            входное событие из очереди.
+            Когда внешний оркестратор Google ADK Go самостоятельно вызывает Next(),
+            вернуть ему готовое каноническое наблюдение и после успешной выдачи
+            удалить соответствующее событие из единой очереди. harnes-perception
+            не инициирует взаимодействие с оркестратором и не контролирует его.
         </STEP>
     </BUSINESS_PROCESS>
 
@@ -479,6 +548,9 @@
               to="STATE-PERCEPTION-PROCESSING" />
         <LINK from="STATE-MODEL-PERCEPTION-INPUT-EVENT"
               relation="CONTAINS"
+              to="STATE-PERCEPTION-READY" />
+        <LINK from="STATE-MODEL-PERCEPTION-INPUT-EVENT"
+              relation="CONTAINS"
               to="STATE-PERCEPTION-PROCESSED" />
 
         <LINK from="STEP-QUEUE-EVENT"
@@ -490,9 +562,12 @@
         <LINK from="STEP-PREEMPT-ON-HIGHER-IMPORTANCE"
               relation="CAUSES"
               to="TRANSITION-PERCEPTION-PROCESSING-TO-QUEUED" />
+        <LINK from="STEP-FORM-OBSERVATION"
+              relation="CAUSES"
+              to="TRANSITION-PERCEPTION-PROCESSING-TO-READY" />
         <LINK from="STEP-RETURN-OBSERVATION"
               relation="CAUSES"
-              to="TRANSITION-PERCEPTION-PROCESSING-TO-PROCESSED" />
+              to="TRANSITION-PERCEPTION-READY-TO-PROCESSED" />
 
         <LINK from="REQ-PERCEPTION-IMPORTANCE-SOURCE"
               relation="GOVERNS"
@@ -545,6 +620,21 @@
         <LINK from="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION"
               relation="GOVERNS"
               to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+        <LINK from="REQ-PERCEPTION-SINGLE-QUEUE"
+              relation="GOVERNS"
+              to="STEP-QUEUE-EVENT" />
+        <LINK from="REQ-PERCEPTION-READY-RETENTION"
+              relation="GOVERNS"
+              to="STEP-FORM-OBSERVATION" />
+        <LINK from="REQ-PERCEPTION-READY-RETENTION"
+              relation="GOVERNS"
+              to="STEP-RETURN-OBSERVATION" />
+        <LINK from="REQ-PERCEPTION-NEXT-PULL"
+              relation="GOVERNS"
+              to="STEP-RETURN-OBSERVATION" />
+        <LINK from="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE"
+              relation="GOVERNS"
+              to="STEP-RETURN-OBSERVATION" />
         <LINK from="CONSTRAINT-PERCEPTION-NO-NUMERIC-SLA"
               relation="APPLIES_TO"
               to="REQ-PERCEPTION-IMPORTANCE-ORDER" />
@@ -564,6 +654,12 @@
         <LINK from="INV-PERCEPTION-NO-PARTIAL-OBSERVATION"
               relation="APPLIES_TO"
               to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+        <LINK from="INV-PERCEPTION-READY-RETAINED"
+              relation="APPLIES_TO"
+              to="STEP-FORM-OBSERVATION" />
+        <LINK from="INV-PERCEPTION-READY-RETAINED"
+              relation="APPLIES_TO"
+              to="STEP-RETURN-OBSERVATION" />
         <LINK from="INV-PERCEPTION-REMOVAL-CONDITIONS"
               relation="APPLIES_TO"
               to="STEP-RETURN-OBSERVATION" />
@@ -609,6 +705,21 @@
         <LINK from="CRITERION-PERCEPTION-SUCCESS"
               relation="VERIFIES"
               to="REQ-PERCEPTION-ARTIFACT-LINK" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-SINGLE-QUEUE" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-READY-RETENTION" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-NEXT-PULL" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="INV-PERCEPTION-READY-RETAINED" />
         <LINK from="CRITERION-PERCEPTION-SUCCESS"
               relation="VERIFIES"
               to="INV-PERCEPTION-REMOVAL-CONDITIONS" />
