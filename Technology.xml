@@ -48,12 +48,14 @@
 
     <DATA_REPRESENTATION id="TECH-DATA-REPRESENTATION">
         <INPUT_EVENT id="TECH-TYPED-GO-INPUT-EVENT">
-            <REPRESENTATION>TYPED_GO_VALUE</REPRESENTATION>
-            <RAW_JSON_PROCESSING>NONE</RAW_JSON_PROCESSING>
+            <TRANSPORT_SOURCE>HTTP_REQUEST</TRANSPORT_SOURCE>
+            <DECODING_LOCATION>HARNES_PERCEPTION_HTTP_SERVER</DECODING_LOCATION>
+            <REPRESENTATION>TYPED_GO_VALUE_AFTER_HTTP_DECODING</REPRESENTATION>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                Внешний REST-слой декодирует JSON до вызова пакета
-                и передаёт harnes-perception типизированное значение Go.
+                HTTP-сервер harnes-perception принимает внешнее событие,
+                декодирует его транспортное представление внутри сервиса
+                и передаёт на обработку типизированное значение Go.
             </RATIONALE>
             <TRACES_TO>
                 <INPUT ref="INPUT-EXTERNAL-EVENT" />
@@ -66,8 +68,8 @@
             <REPRESENTATION>TYPED_GO_STRUCT</REPRESENTATION>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                harnes-perception возвращает внешнему оркестратору Google ADK Go
-                типизированную Go-структуру канонического наблюдения.
+                Внутри сервиса harnes-perception формирует каноническое наблюдение
+                как типизированную Go-структуру.
             </RATIONALE>
             <TRACES_TO>
                 <OUTPUT ref="OUTPUT-CANONICAL-OBSERVATION" />
@@ -187,21 +189,19 @@
         </TRACES_TO>
     </SECURITY>
 
-    <INTEGRATION_INTERFACE id="TECH-IN-PROCESS-GO-API">
-        <MECHANISM>PUBLIC_GO_API</MECHANISM>
-        <PROCESS_BOUNDARY>IN_PROCESS</PROCESS_BOUNDARY>
-        <INPUT_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
-        <OUTPUT_REPRESENTATION ref="TECH-TYPED-GO-CANONICAL-OBSERVATION" />
-        <RAW_JSON_PROCESSING>NONE</RAW_JSON_PROCESSING>
+    <INTEGRATION_INTERFACE id="TECH-HTTP-SERVER-API">
+        <MECHANISM>HTTP_SERVER</MECHANISM>
+        <PROCESS_BOUNDARY>INTER_PROCESS_OVER_NETWORK</PROCESS_BOUNDARY>
+        <INTERNAL_INPUT_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
+        <INTERNAL_OUTPUT_REPRESENTATION ref="TECH-TYPED-GO-CANONICAL-OBSERVATION" />
         <DIRECT_GOOGLE_ADK_DEPENDENCY>NONE</DIRECT_GOOGLE_ADK_DEPENDENCY>
         <ORCHESTRATOR_BOUNDARY>EXTERNAL_TO_HARNES_PERCEPTION</ORCHESTRATOR_BOUNDARY>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
         <RATIONALE>
-            Внешний REST-слой декодирует JSON и передаёт пакету
-            типизированное значение Go. harnes-perception не обрабатывает
-            raw JSON и не зависит напрямую от Google ADK Go. Через публичный
-            Go API пакет возвращает типизированную структуру внешнему оркестратору
-            Google ADK Go, который не является частью harnes-perception.
+            harnes-perception работает как самостоятельный Go-сервис
+            и принимает внешние события через собственный HTTP-сервер.
+            Оркестратор Google ADK Go остаётся внешним компонентом
+            и не является зависимостью сервиса.
         </RATIONALE>
         <TRACES_TO>
             <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
@@ -213,12 +213,13 @@
 
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
-        <COMPONENT_FORM>GO_PACKAGE</COMPONENT_FORM>
-        <INTEGRATION_MODE>EMBEDDED_IN_CALLING_APPLICATION</INTEGRATION_MODE>
+        <COMPONENT_FORM>GO_SERVICE</COMPONENT_FORM>
+        <INTEGRATION_MODE>STANDALONE_HTTP_SERVICE</INTEGRATION_MODE>
+        <DEPLOYMENT_UNIT>STANDALONE_PROCESS</DEPLOYMENT_UNIT>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
         <RATIONALE>
-            harnes-perception поставляется как Go package
-            и встраивается в вызывающее приложение.
+            harnes-perception поставляется и запускается как самостоятельный
+            Go-сервис с собственным HTTP-сервером.
         </RATIONALE>
         <LANGUAGE ref="TECH-LANGUAGE-GO" />
     </MODULE_IDENTITY>
