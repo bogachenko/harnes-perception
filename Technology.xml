@@ -126,6 +126,24 @@
             </TRACES_TO>
         </CANCELLATION_CONTROL>
 
+        <TIME_SOURCE id="TECH-PROCESS-SYSTEM-CLOCK">
+            <CLOCK_SOURCE>PROCESS_SYSTEM_CLOCK</CLOCK_SOURCE>
+            <LIBRARY>GO_STANDARD_LIBRARY_TIME</LIBRARY>
+            <CAPTURE_POINT>INITIAL_EVENT_ACCEPTANCE</CAPTURE_POINT>
+            <REPROCESSING_BEHAVIOR>PRESERVE_ORIGINAL_VALUE</REPROCESSING_BEHAVIOR>
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                Момент первоначального поступления события фиксируется
+                по системным часам процесса через стандартный пакет Go time.
+                При отмене и повторной обработке значение не изменяется.
+            </RATIONALE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-RECEIPT-TIMESTAMP" />
+                <INVARIANT ref="INV-PERCEPTION-ARRIVAL-TIME-UNCHANGED" />
+                <OUTPUT ref="OUTPUT-CANONICAL-OBSERVATION" />
+            </TRACES_TO>
+        </TIME_SOURCE>
+
         <FILE_ARTIFACTS id="TECH-LOCAL-FILE-ARTIFACTS">
             <STORAGE_LOCATION>LOCAL_DIRECTORY</STORAGE_LOCATION>
             <DIRECTORY_PATH_SOURCE>PROVIDED_AT_INITIALIZATION</DIRECTORY_PATH_SOURCE>
