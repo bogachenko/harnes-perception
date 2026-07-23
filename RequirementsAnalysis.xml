@@ -531,6 +531,9 @@
         <LINK from="CRITERION-PERCEPTION-SUCCESS"
               relation="VERIFIES"
               to="INV-PERCEPTION-REMOVAL-CONDITIONS" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="INV-PERCEPTION-IMPORTANCE-UNCHANGED" />
 
         <LINK from="CRITERION-PERCEPTION-NOISE-EXCLUDED"
               relation="VERIFIES"
@@ -545,6 +548,9 @@
         <LINK from="CRITERION-PERCEPTION-EQUAL-IMPORTANCE-ORDER"
               relation="VERIFIES"
               to="REQ-PERCEPTION-EQUAL-IMPORTANCE-ORDER" />
+        <LINK from="CRITERION-PERCEPTION-EQUAL-IMPORTANCE-ORDER"
+              relation="VERIFIES"
+              to="INV-PERCEPTION-ARRIVAL-TIME-UNCHANGED" />
 
         <LINK from="CRITERION-PERCEPTION-PREEMPTION"
               relation="VERIFIES"
@@ -558,6 +564,9 @@
         <LINK from="CRITERION-PERCEPTION-PREEMPTION"
               relation="VERIFIES"
               to="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION" />
+        <LINK from="CRITERION-PERCEPTION-PREEMPTION"
+              relation="VERIFIES"
+              to="INV-PERCEPTION-NO-PARTIAL-OBSERVATION" />
 
         <LINK from="CRITERION-PERCEPTION-MISSING-IMPORTANCE"
               relation="VERIFIES"
@@ -574,5 +583,11 @@
         <LINK from="CRITERION-PERCEPTION-PROCESSING-FAILED"
               relation="VERIFIES"
               to="ERR-PERCEPTION-PROCESSING-FAILED" />
+        <LINK from="CRITERION-PERCEPTION-PROCESSING-FAILED"
+              relation="VERIFIES"
+              to="INV-PERCEPTION-NO-PARTIAL-OBSERVATION" />
+        <LINK from="CRITERION-PERCEPTION-PROCESSING-FAILED"
+              relation="VERIFIES"
+              to="INV-PERCEPTION-REMOVAL-CONDITIONS" />
     </SEMANTIC_GRAPH>
 </REQUIREMENTS_ANALYSIS>
