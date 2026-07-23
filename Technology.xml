@@ -120,6 +120,25 @@
         </FILE_ARTIFACTS>
     </INFRASTRUCTURE>
 
+    <SECURITY id="TECH-SECURITY">
+        <AUTHENTICATION>NONE</AUTHENTICATION>
+        <AUTHORIZATION>NONE</AUTHORIZATION>
+        <PROCESS_ACCESS_CONTROL>RUNTIME_ENVIRONMENT</PROCESS_ACCESS_CONTROL>
+        <LOCAL_DIRECTORY_ACCESS_CONTROL>LINUX_FILE_PERMISSIONS</LOCAL_DIRECTORY_ACCESS_CONTROL>
+        <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+        <RATIONALE>
+            harnes-perception не реализует собственную аутентификацию
+            и авторизацию. Доступ к процессу и локальной папке
+            контролируется окружением и файловыми правами Linux.
+        </RATIONALE>
+        <TRACES_TO>
+            <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
+            <ACTOR ref="ACTOR-CALLING-COMPONENT" />
+            <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
+            <USE_CASE ref="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
+        </TRACES_TO>
+    </SECURITY>
+
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
