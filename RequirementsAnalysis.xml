@@ -1161,4 +1161,168 @@
             <INVARIANT ref="INV-PERCEPTION-OUTCOME-HONESTY" />
         </LINKS>
     </FUNCTIONAL_REQUIREMENTS>
+
+    <FUNCTIONAL_REQUIREMENTS id="FRG-PERCEPTION-OPERATION-LIFECYCLE" status="APPROVED_BY_OWNER">
+        <NAME>Жизненный цикл операции восприятия и временных ресурсов</NAME>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-001" priority="MUST">
+            <NAME>Явное начало операции</NAME>
+            <STATEMENT>
+                Компонент должен создать и зарегистрировать операцию восприятия
+                до начала технического преобразования входа.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Для выполняемого преобразования существует самостоятельная операция,
+                связанная с конкретным входом и временем начала обработки.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-002" priority="MUST">
+            <NAME>Различимость незавершённой и завершённой операции</NAME>
+            <STATEMENT>
+                Компонент должен позволять отличить операцию, обработка которой продолжается,
+                от операции, достигшей окончательного результата.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Потребитель не воспринимает промежуточное состояние операции
+                как её окончательный результат.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-003" priority="MUST">
+            <NAME>Один окончательный исход операции</NAME>
+            <STATEMENT>
+                Каждая операция должна завершиться одним явно определённым исходом:
+                успешным выпуском наблюдений, частичным успешным результатом
+                либо типизированной невозможностью обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Операция не представлена одновременно как успешно завершённая
+                и завершённая без выпуска наблюдения.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-004" priority="MUST">
+            <NAME>Фиксация времени завершения</NAME>
+            <STATEMENT>
+                При достижении окончательного исхода компонент должен зафиксировать
+                время завершения операции отдельно от времени исходного события,
+                поступления входа и начала обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Временные характеристики происхождения, поступления, начала
+                и завершения обработки не подменяют друг друга.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-005" priority="MUST">
+            <NAME>Запрет выпуска результата после завершения</NAME>
+            <STATEMENT>
+                После явного завершения операции компонент не должен выпускать
+                от её имени дополнительные наблюдения или изменять её окончательный исход.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Любая последующая обработка того же входа выполняется как новая
+                самостоятельная операция.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-006" priority="MUST">
+            <NAME>Привязка временных ресурсов к операции</NAME>
+            <STATEMENT>
+                Временные буферы, файлы и производные технические представления
+                должны быть связаны с операцией, для которой они были созданы.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Можно определить, какой операции принадлежит каждый временный ресурс,
+                используемый в ходе обработки.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-007" priority="MUST">
+            <NAME>Освобождение временных ресурсов</NAME>
+            <STATEMENT>
+                Компонент должен освобождать временные ресурсы, которые больше
+                не требуются после завершения операции, независимо от её исхода.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Успешное завершение, частичный результат и невозможность обработки
+                не оставляют неограниченно живущие временные ресурсы.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-008" priority="MUST">
+            <NAME>Целостность результата после очистки</NAME>
+            <STATEMENT>
+                Освобождение временных ресурсов не должно делать уже выпущенное
+                наблюдение непрослеживаемым или оставлять в нём недействительные ссылки,
+                необходимые для понимания результата.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                После очистки сохраняются обязательные сведения о происхождении,
+                операции и преобразованиях либо действительные ссылки на них.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-009" priority="MUST">
+            <NAME>Необязательность постоянного хранения</NAME>
+            <STATEMENT>
+                Завершение операции не должно автоматически создавать постоянное
+                хранилище входа, производных представлений или наблюдений.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Операция может полностью завершиться после передачи результата
+                и освобождения временных ресурсов без долговременного сохранения.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-LIFECYCLE-010" priority="MUST">
+            <NAME>Явность ошибки освобождения ресурсов</NAME>
+            <STATEMENT>
+                Если компонент не смог освободить принадлежащий операции временный ресурс,
+                эта техническая проблема должна быть зарегистрирована явно
+                и не должна скрываться успешным завершением очистки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Неудачная очистка обнаружима отдельно от предметного результата
+                преобразования входа.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <BOUNDARY>
+            <RULE>
+                Требования не определяют конкретную программную модель состояний операции.
+            </RULE>
+            <RULE>
+                Требования не определяют тип временного хранилища, формат буферов,
+                файловую систему или внешнее объектное хранилище.
+            </RULE>
+            <RULE>
+                Требования не устанавливают числовые таймауты, квоты,
+                пределы размера или длительность хранения временных ресурсов.
+            </RULE>
+            <RULE>
+                Требования не определяют внешнюю отмену операции,
+                повторный запуск и политику автоматических повторных попыток.
+            </RULE>
+            <RULE>
+                Требования не определяют планирование, приоритеты
+                и конкурентное выполнение нескольких операций.
+            </RULE>
+        </BOUNDARY>
+
+        <LINKS>
+            <PROJECT_GOAL ref="GOAL-PERCEPTION-001" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
+            <ENTITY ref="ENT-PERCEPTION-INPUT" />
+            <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+            <ENTITY ref="ENT-TRANSFORMATION-RECORD" />
+            <ENTITY ref="ENT-OBSERVATION" />
+            <ENTITY ref="ENT-PERCEPTION-FAILURE" />
+            <INVARIANT ref="INV-PERCEPTION-TRACEABILITY" />
+            <INVARIANT ref="INV-PERCEPTION-OPERATION-IDENTITY" />
+            <INVARIANT ref="INV-PERCEPTION-TIME-SEPARATION" />
+            <INVARIANT ref="INV-PERCEPTION-OUTCOME-HONESTY" />
+        </LINKS>
+    </FUNCTIONAL_REQUIREMENTS>
 </REQUIREMENTS_ANALYSIS>
