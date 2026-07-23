@@ -81,6 +81,12 @@
             harnes-perception отклоняет его и не помещает в очередь обработки.
         </ERROR_CASE>
 
+        <ERROR_CASE id="ERR-PERCEPTION-INVALID-IMPORTANCE">
+            Если входное событие содержит степень важности, отличную от low,
+            medium или high, harnes-perception отклоняет его и не помещает
+            в очередь обработки.
+        </ERROR_CASE>
+
         <ERROR_CASE id="ERR-PERCEPTION-PROCESSING-FAILED">
             Если обработка входного события завершается ошибкой до формирования
             канонического наблюдения, событие удаляется из очереди.
@@ -217,6 +223,11 @@
         <CRITERION id="CRITERION-PERCEPTION-MISSING-IMPORTANCE">
             Входное событие без степени важности отклоняется и не помещается
             в очередь обработки.
+        </CRITERION>
+
+        <CRITERION id="CRITERION-PERCEPTION-INVALID-IMPORTANCE">
+            Входное событие со степенью важности, отличной от low, medium или high,
+            отклоняется и не помещается в очередь обработки.
         </CRITERION>
 
         <CRITERION id="CRITERION-PERCEPTION-PROCESSING-FAILED">
@@ -462,6 +473,9 @@
         <LINK from="ERR-PERCEPTION-MISSING-IMPORTANCE"
               relation="APPLIES_TO"
               to="STEP-RECEIVE-EVENT" />
+        <LINK from="ERR-PERCEPTION-INVALID-IMPORTANCE"
+              relation="APPLIES_TO"
+              to="STEP-RECEIVE-EVENT" />
         <LINK from="ERR-PERCEPTION-PROCESSING-FAILED"
               relation="APPLIES_TO"
               to="STEP-PROCESS-EVENT" />
@@ -519,6 +533,12 @@
         <LINK from="CRITERION-PERCEPTION-MISSING-IMPORTANCE"
               relation="VERIFIES"
               to="ERR-PERCEPTION-MISSING-IMPORTANCE" />
+        <LINK from="CRITERION-PERCEPTION-INVALID-IMPORTANCE"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-IMPORTANCE-LEVELS" />
+        <LINK from="CRITERION-PERCEPTION-INVALID-IMPORTANCE"
+              relation="VERIFIES"
+              to="ERR-PERCEPTION-INVALID-IMPORTANCE" />
         <LINK from="CRITERION-PERCEPTION-PROCESSING-FAILED"
               relation="VERIFIES"
               to="ERR-PERCEPTION-PROCESSING-FAILED" />
