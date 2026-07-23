@@ -66,6 +66,21 @@
         </CANONICAL_OBSERVATION_FORMAT>
     </DATA_FORMATS>
 
+    <RUNTIME_ENVIRONMENT id="TECH-RUNTIME-ENVIRONMENT">
+        <OPERATING_SYSTEM>Linux</OPERATING_SYSTEM>
+        <KERNEL>Linux</KERNEL>
+        <ARCHITECTURE>x86-64</ARCHITECTURE>
+        <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+        <RATIONALE>
+            Среда исполнения ограничена утверждённой владельцем платформой
+            Linux на архитектуре x86-64.
+        </RATIONALE>
+        <TRACES_TO>
+            <GOAL ref="GOAL-PERCEPTION-001" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-EVENT-PROCESSING" />
+        </TRACES_TO>
+    </RUNTIME_ENVIRONMENT>
+
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
