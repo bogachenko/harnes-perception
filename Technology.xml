@@ -81,6 +81,26 @@
         </TRACES_TO>
     </RUNTIME_ENVIRONMENT>
 
+    <INFRASTRUCTURE id="TECH-INFRASTRUCTURE">
+        <EVENT_QUEUE id="TECH-IN-PROCESS-EVENT-QUEUE">
+            <LOCATION>GO_PROCESS</LOCATION>
+            <EXTERNAL_BROKER>NONE</EXTERNAL_BROKER>
+            <DATABASE>NONE</DATABASE>
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                Очередь входных событий размещается внутри процесса Go
+                без внешнего брокера и базы данных.
+            </RATIONALE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-ORDER" />
+                <REQUIREMENT ref="REQ-PERCEPTION-EQUAL-IMPORTANCE-ORDER" />
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-QUEUE-RETENTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION" />
+            </TRACES_TO>
+        </EVENT_QUEUE>
+    </INFRASTRUCTURE>
+
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
