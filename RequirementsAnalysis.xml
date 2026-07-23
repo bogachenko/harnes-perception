@@ -87,6 +87,31 @@
         </REQUIREMENT>
     </REQUIREMENTS>
 
+    <USE_CASES>
+        <USE_CASE id="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA">
+            <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
+            <ACTION>
+                Передать внешний сигнал или уже сформированный пакет данных
+                со степенью важности, определённой до передачи.
+            </ACTION>
+            <GOAL>
+                Передать внешние данные в harnes-perception для формирования
+                канонического наблюдения.
+            </GOAL>
+        </USE_CASE>
+
+        <USE_CASE id="UC-PERCEPTION-CONSUME-CANONICAL-OBSERVATION">
+            <ACTOR ref="ACTOR-HARNESS" />
+            <ACTION>
+                Получить каноническое наблюдение от harnes-perception.
+            </ACTION>
+            <GOAL>
+                Получить каноническое наблюдение для последующей обработки
+                системой оркестрации.
+            </GOAL>
+        </USE_CASE>
+    </USE_CASES>
+
     <BUSINESS_PROCESS id="BP-PERCEPTION-EVENT-PROCESSING">
         <STEP order="1" id="STEP-RECEIVE-EVENT">
             Получить входное событие от внешнего источника вместе с заданной
