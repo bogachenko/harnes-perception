@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<REQUIREMENTS_ANALYSIS id="RA-HARNES-PERCEPTION" status="DRAFT">
+<REQUIREMENTS_ANALYSIS id="RA-HARNES-PERCEPTION" status="APPROVED_BY_OWNER">
     <PROJECT_GOAL id="GOAL-PERCEPTION-001">
         Принимать внешний сигнал или уже сформированный внешним источником
         пакет данных и формировать каноническое наблюдение, содержащее
