@@ -29,6 +29,23 @@
         </APPLICATION_FRAMEWORK>
     </FRAMEWORKS>
 
+    <LIBRARIES id="TECH-LIBRARIES">
+        <STANDARD_LIBRARY id="TECH-GO-STANDARD-LIBRARY">
+            <SELECTION>GO_STANDARD_LIBRARY_ONLY</SELECTION>
+            <THIRD_PARTY_LIBRARIES>NONE</THIRD_PARTY_LIBRARIES>
+            <COMPATIBILITY ref="TECH-LANGUAGE-GO" />
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                Реализация использует только стандартную библиотеку Go
+                без сторонних библиотек.
+            </RATIONALE>
+            <TRACES_TO>
+                <GOAL ref="GOAL-PERCEPTION-001" />
+                <BUSINESS_PROCESS ref="BP-PERCEPTION-EVENT-PROCESSING" />
+            </TRACES_TO>
+        </STANDARD_LIBRARY>
+    </LIBRARIES>
+
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
