@@ -58,6 +58,7 @@
             <TRACES_TO>
                 <INPUT ref="INPUT-EXTERNAL-EVENT" />
                 <ENTITY ref="ENTITY-PERCEPTION-INPUT-EVENT" />
+                <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
             </TRACES_TO>
         </INPUT_EVENT>
 
@@ -65,7 +66,7 @@
             <REPRESENTATION>TYPED_GO_STRUCT</REPRESENTATION>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                harnes-perception возвращает вызывающему приложению
+                harnes-perception возвращает внешнему оркестратору Google ADK Go
                 типизированную Go-структуру канонического наблюдения.
             </RATIONALE>
             <TRACES_TO>
@@ -153,10 +154,10 @@
             <FILE_COPYING>NONE</FILE_COPYING>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                Файловый артефакт находится в локальной папке, путь к которой
-                задаётся при инициализации. harnes-perception создаёт ссылку
-                в виде относительного пути внутри этой папки на существующий
-                локальный файл без его копирования.
+                Файловые артефакты находятся в локальной папке, путь к которой
+                задаётся при инициализации. Для каждого переданного артефакта
+                harnes-perception создаёт ссылку в виде относительного пути
+                внутри этой папки на существующий локальный файл без его копирования.
             </RATIONALE>
             <TRACES_TO>
                 <INPUT ref="INPUT-EXTERNAL-EVENT" />
@@ -180,7 +181,7 @@
         </RATIONALE>
         <TRACES_TO>
             <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
-            <ACTOR ref="ACTOR-CALLING-COMPONENT" />
+            <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
             <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
             <USE_CASE ref="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
         </TRACES_TO>
@@ -193,16 +194,18 @@
         <OUTPUT_REPRESENTATION ref="TECH-TYPED-GO-CANONICAL-OBSERVATION" />
         <RAW_JSON_PROCESSING>NONE</RAW_JSON_PROCESSING>
         <DIRECT_GOOGLE_ADK_DEPENDENCY>NONE</DIRECT_GOOGLE_ADK_DEPENDENCY>
+        <ORCHESTRATOR_BOUNDARY>EXTERNAL_TO_HARNES_PERCEPTION</ORCHESTRATOR_BOUNDARY>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
         <RATIONALE>
             Внешний REST-слой декодирует JSON и передаёт пакету
             типизированное значение Go. harnes-perception не обрабатывает
-            raw JSON, не зависит напрямую от Google ADK Go и возвращает
-            типизированную структуру вызывающему приложению.
+            raw JSON и не зависит напрямую от Google ADK Go. Через публичный
+            Go API пакет возвращает типизированную структуру внешнему оркестратору
+            Google ADK Go, который не является частью harnes-perception.
         </RATIONALE>
         <TRACES_TO>
             <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
-            <ACTOR ref="ACTOR-CALLING-COMPONENT" />
+            <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
             <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
             <USE_CASE ref="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
         </TRACES_TO>
