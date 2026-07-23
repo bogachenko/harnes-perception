@@ -558,4 +558,137 @@
             <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
         </LINKS>
     </DOMAIN_INVARIANTS>
+
+    <FUNCTIONAL_REQUIREMENTS id="FRG-PERCEPTION-INPUT" status="APPROVED_BY_OWNER">
+        <NAME>Приём и первичная регистрация входа восприятия</NAME>
+
+        <REQUIREMENT id="FR-PERCEPTION-INPUT-001" priority="MUST">
+            <NAME>Приём поддерживаемых форм входа</NAME>
+            <STATEMENT>
+                Компонент должен принимать поддерживаемые данные, сообщения,
+                ограниченные фрагменты потока либо разрешённые ссылки на ресурсы.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Для каждой заявленной поддерживаемой формы входа может быть создана
+                отдельная операция восприятия или сформирован типизированный отказ.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-INPUT-002" priority="MUST">
+            <NAME>Создание отдельной операции восприятия</NAME>
+            <STATEMENT>
+                Для каждого принятого входа компонент должен создать самостоятельную
+                операцию восприятия до начала преобразования содержимого.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Операция имеет собственную идентичность и связана с конкретным входом.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-INPUT-003" priority="MUST">
+            <NAME>Регистрация доступного происхождения</NAME>
+            <STATEMENT>
+                При приёме входа компонент должен сохранить все доступные сведения
+                об источнике, инициаторе передачи, исходном событии, запросе
+                и положении в потоке.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Переданные сведения о происхождении доступны в контексте операции,
+                а отсутствующие сведения обозначены как неизвестные.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-INPUT-004" priority="MUST">
+            <NAME>Фиксация времени поступления</NAME>
+            <STATEMENT>
+                Компонент должен зафиксировать время фактического поступления входа
+                независимо от времени исходного события, указанного источником.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Время поступления и время исходного события представлены раздельно
+                и не подменяют друг друга.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-INPUT-005" priority="MUST">
+            <NAME>Разделение заявленного и определённого типа содержимого</NAME>
+            <STATEMENT>
+                Компонент должен сохранять заявленный источником тип содержимого
+                отдельно от типа, определённого технической проверкой.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Несовпадение заявленного и определённого типов может быть обнаружено
+                и не скрывается заменой одного значения другим.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-INPUT-006" priority="MUST">
+            <NAME>Сохранение исходного представления</NAME>
+            <STATEMENT>
+                Принятые данные не должны молча изменяться в процессе первичной
+                регистрации входа.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Любое изменённое представление создаётся как производное,
+                а исходный вход остаётся отличимым от него.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-INPUT-007" priority="MUST">
+            <NAME>Получение разрешённого ресурса</NAME>
+            <STATEMENT>
+                Если вход передан ссылкой или идентификатором ресурса, компонент должен
+                обращаться только к указанному и уже разрешённому ресурсу.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Компонент не выполняет самостоятельный поиск альтернативного источника
+                и формирует типизированный отказ, если ресурс недоступен.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <REQUIREMENT id="FR-PERCEPTION-INPUT-008" priority="MUST">
+            <NAME>Явный отказ при невозможности приёма</NAME>
+            <STATEMENT>
+                Неподдерживаемый, недоступный, пустой, повреждённый либо технически
+                неприемлемый вход должен приводить к типизированному результату
+                невозможности обработки.
+            </STATEMENT>
+            <ACCEPTANCE_CRITERIA>
+                Невозможность приёма не представляется пустым наблюдением
+                или успешной операцией без результата.
+            </ACCEPTANCE_CRITERIA>
+        </REQUIREMENT>
+
+        <BOUNDARY>
+            <RULE>
+                Требования не определяют конкретные протоколы, форматы файлов,
+                транспортные библиотеки или программные интерфейсы.
+            </RULE>
+            <RULE>
+                Требования не устанавливают числовые пределы размера, длительности
+                и скорости поступления входа.
+            </RULE>
+            <RULE>
+                Требования не определяют подписки, переподключение, повторную доставку,
+                подтверждение сообщений и сборку непрерывных потоков.
+            </RULE>
+            <RULE>
+                Требования не разрешают компоненту самостоятельно обнаруживать
+                или выбирать новые источники данных.
+            </RULE>
+        </BOUNDARY>
+
+        <LINKS>
+            <PROJECT_GOAL ref="GOAL-PERCEPTION-001" />
+            <BUSINESS_PROCESS ref="BP-PERCEPTION-001" />
+            <ENTITY ref="ENT-DATA-SOURCE" />
+            <ENTITY ref="ENT-PERCEPTION-INPUT" />
+            <ENTITY ref="ENT-PERCEPTION-OPERATION" />
+            <ENTITY ref="ENT-PERCEPTION-FAILURE" />
+            <INVARIANT ref="INV-PERCEPTION-SOURCE-PROVENANCE" />
+            <INVARIANT ref="INV-PERCEPTION-INPUT-INTEGRITY" />
+            <INVARIANT ref="INV-PERCEPTION-OPERATION-IDENTITY" />
+            <INVARIANT ref="INV-PERCEPTION-TIME-SEPARATION" />
+        </LINKS>
+    </FUNCTIONAL_REQUIREMENTS>
 </REQUIREMENTS_ANALYSIS>
