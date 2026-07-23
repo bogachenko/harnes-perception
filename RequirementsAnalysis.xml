@@ -311,4 +311,164 @@
             и удалить входное событие из очереди.
         </STEP>
     </BUSINESS_PROCESS>
+
+    <SEMANTIC_GRAPH id="GRAPH-PERCEPTION-REQUIREMENTS">
+        <LINK from="ACTOR-EXTERNAL-SOURCE"
+              relation="PERFORMS"
+              to="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
+        <LINK from="ACTOR-CALLING-COMPONENT"
+              relation="PERFORMS"
+              to="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
+
+        <LINK from="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA"
+              relation="STARTS"
+              to="BP-PERCEPTION-EVENT-PROCESSING" />
+        <LINK from="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION"
+              relation="RECEIVES"
+              to="OUTPUT-CANONICAL-OBSERVATION" />
+
+        <LINK from="BP-PERCEPTION-EVENT-PROCESSING"
+              relation="REALIZES"
+              to="GOAL-PERCEPTION-001" />
+        <LINK from="BP-PERCEPTION-EVENT-PROCESSING"
+              relation="CONSUMES"
+              to="INPUT-EXTERNAL-EVENT" />
+        <LINK from="BP-PERCEPTION-EVENT-PROCESSING"
+              relation="PRODUCES"
+              to="OUTPUT-CANONICAL-OBSERVATION" />
+        <LINK from="BP-PERCEPTION-EVENT-PROCESSING"
+              relation="USES"
+              to="STATE-MODEL-PERCEPTION-INPUT-EVENT" />
+
+        <LINK from="INPUT-EXTERNAL-EVENT"
+              relation="DESCRIBES"
+              to="ENTITY-PERCEPTION-INPUT-EVENT" />
+        <LINK from="OUTPUT-CANONICAL-OBSERVATION"
+              relation="DESCRIBES"
+              to="ENTITY-PERCEPTION-CANONICAL-OBSERVATION" />
+
+        <LINK from="STATE-MODEL-PERCEPTION-INPUT-EVENT"
+              relation="CONTAINS"
+              to="STATE-PERCEPTION-QUEUED" />
+        <LINK from="STATE-MODEL-PERCEPTION-INPUT-EVENT"
+              relation="CONTAINS"
+              to="STATE-PERCEPTION-PROCESSING" />
+        <LINK from="STATE-MODEL-PERCEPTION-INPUT-EVENT"
+              relation="CONTAINS"
+              to="STATE-PERCEPTION-PROCESSED" />
+
+        <LINK from="STEP-QUEUE-EVENT"
+              relation="ESTABLISHES"
+              to="STATE-PERCEPTION-QUEUED" />
+        <LINK from="STEP-SELECT-EVENT"
+              relation="CAUSES"
+              to="TRANSITION-PERCEPTION-QUEUED-TO-PROCESSING" />
+        <LINK from="STEP-PREEMPT-ON-HIGHER-IMPORTANCE"
+              relation="CAUSES"
+              to="TRANSITION-PERCEPTION-PROCESSING-TO-QUEUED" />
+        <LINK from="STEP-RETURN-OBSERVATION"
+              relation="CAUSES"
+              to="TRANSITION-PERCEPTION-PROCESSING-TO-PROCESSED" />
+
+        <LINK from="REQ-PERCEPTION-IMPORTANCE-SOURCE"
+              relation="GOVERNS"
+              to="STEP-RECEIVE-EVENT" />
+        <LINK from="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH"
+              relation="GOVERNS"
+              to="STEP-FORM-OBSERVATION" />
+        <LINK from="REQ-PERCEPTION-IMPORTANCE-ORDER"
+              relation="GOVERNS"
+              to="STEP-SELECT-EVENT" />
+        <LINK from="REQ-PERCEPTION-EQUAL-IMPORTANCE-ORDER"
+              relation="GOVERNS"
+              to="STEP-SELECT-EVENT" />
+        <LINK from="REQ-PERCEPTION-IMPORTANCE-PREEMPTION"
+              relation="GOVERNS"
+              to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+        <LINK from="REQ-PERCEPTION-QUEUE-RETENTION"
+              relation="GOVERNS"
+              to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+        <LINK from="REQ-PERCEPTION-ATOMIC-PROCESSING"
+              relation="GOVERNS"
+              to="STEP-PROCESS-EVENT" />
+        <LINK from="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION"
+              relation="GOVERNS"
+              to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+
+        <LINK from="INV-PERCEPTION-IMPORTANCE-UNCHANGED"
+              relation="APPLIES_TO"
+              to="STEP-FORM-OBSERVATION" />
+        <LINK from="INV-PERCEPTION-ARRIVAL-TIME-UNCHANGED"
+              relation="APPLIES_TO"
+              to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+        <LINK from="INV-PERCEPTION-NO-PARTIAL-OBSERVATION"
+              relation="APPLIES_TO"
+              to="STEP-PROCESS-EVENT" />
+        <LINK from="INV-PERCEPTION-NO-PARTIAL-OBSERVATION"
+              relation="APPLIES_TO"
+              to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+        <LINK from="INV-PERCEPTION-REMOVAL-CONDITIONS"
+              relation="APPLIES_TO"
+              to="STEP-RETURN-OBSERVATION" />
+        <LINK from="INV-PERCEPTION-REMOVAL-CONDITIONS"
+              relation="APPLIES_TO"
+              to="ERR-PERCEPTION-PROCESSING-FAILED" />
+
+        <LINK from="ERR-PERCEPTION-MISSING-IMPORTANCE"
+              relation="APPLIES_TO"
+              to="STEP-RECEIVE-EVENT" />
+        <LINK from="ERR-PERCEPTION-PROCESSING-FAILED"
+              relation="APPLIES_TO"
+              to="STEP-PROCESS-EVENT" />
+
+        <LINK from="EDGE-PERCEPTION-EQUAL-IMPORTANCE"
+              relation="APPLIES_TO"
+              to="STEP-SELECT-EVENT" />
+        <LINK from="EDGE-PERCEPTION-HIGHER-IMPORTANCE-DURING-PROCESSING"
+              relation="APPLIES_TO"
+              to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="GOAL-PERCEPTION-001" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="OUTPUT-CANONICAL-OBSERVATION" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH" />
+        <LINK from="CRITERION-PERCEPTION-SUCCESS"
+              relation="VERIFIES"
+              to="INV-PERCEPTION-REMOVAL-CONDITIONS" />
+
+        <LINK from="CRITERION-PERCEPTION-IMPORTANCE-ORDER"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-IMPORTANCE-ORDER" />
+        <LINK from="CRITERION-PERCEPTION-EQUAL-IMPORTANCE-ORDER"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-EQUAL-IMPORTANCE-ORDER" />
+
+        <LINK from="CRITERION-PERCEPTION-PREEMPTION"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
+        <LINK from="CRITERION-PERCEPTION-PREEMPTION"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-QUEUE-RETENTION" />
+        <LINK from="CRITERION-PERCEPTION-PREEMPTION"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-ATOMIC-PROCESSING" />
+        <LINK from="CRITERION-PERCEPTION-PREEMPTION"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION" />
+
+        <LINK from="CRITERION-PERCEPTION-MISSING-IMPORTANCE"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-IMPORTANCE-SOURCE" />
+        <LINK from="CRITERION-PERCEPTION-MISSING-IMPORTANCE"
+              relation="VERIFIES"
+              to="ERR-PERCEPTION-MISSING-IMPORTANCE" />
+        <LINK from="CRITERION-PERCEPTION-PROCESSING-FAILED"
+              relation="VERIFIES"
+              to="ERR-PERCEPTION-PROCESSING-FAILED" />
+    </SEMANTIC_GRAPH>
 </REQUIREMENTS_ANALYSIS>
