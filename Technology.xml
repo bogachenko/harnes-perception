@@ -49,18 +49,30 @@
     <DATA_REPRESENTATION id="TECH-DATA-REPRESENTATION">
         <INPUT_EVENT id="TECH-TYPED-GO-INPUT-EVENT">
             <TRANSPORT_SOURCE>HTTP_REQUEST</TRANSPORT_SOURCE>
+            <CONTENT_TYPE>application/json</CONTENT_TYPE>
+            <SERIALIZATION>JSON</SERIALIZATION>
+            <DECODING_LIBRARY>GO_STANDARD_LIBRARY_ENCODING_JSON</DECODING_LIBRARY>
             <DECODING_LOCATION>HARNES_PERCEPTION_HTTP_INGRESS</DECODING_LOCATION>
             <REPRESENTATION>TYPED_GO_VALUE_AFTER_HTTP_DECODING</REPRESENTATION>
+            <SOURCE_ID_JSON_FIELD>source_id</SOURCE_ID_JSON_FIELD>
+            <IMPORTANCE_JSON_FIELD>importance</IMPORTANCE_JSON_FIELD>
+            <DATA_JSON_FIELD>data</DATA_JSON_FIELD>
+            <DATA_JSON_VALUE>ANY_JSON_VALUE</DATA_JSON_VALUE>
+            <ARTIFACT_JSON_FIELD>artifact</ARTIFACT_JSON_FIELD>
+            <ARTIFACT_JSON_VALUE>RELATIVE_PATH_STRING_OR_ARRAY_OF_RELATIVE_PATH_STRINGS</ARTIFACT_JSON_VALUE>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
                 Импортируемый пакет harnes-perception принимает внешнее событие
-                через HTTP-вход, декодирует его транспортное представление
-                и передаёт на обработку типизированное значение Go.
+                с Content-Type application/json и декодирует его стандартным пакетом
+                Go encoding/json. JSON содержит source_id, importance, data как
+                JSON-значение и необязательный artifact как относительный путь либо
+                массив относительных путей внутри настроенной локальной директории.
             </RATIONALE>
             <TRACES_TO>
                 <INPUT ref="INPUT-EXTERNAL-EVENT" />
                 <ENTITY ref="ENTITY-PERCEPTION-INPUT-EVENT" />
                 <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ARTIFACT-LINK" />
             </TRACES_TO>
         </INPUT_EVENT>
 
@@ -240,14 +252,23 @@
             <MECHANISM>HTTP_INGRESS</MECHANISM>
             <PURPOSE>EXTERNAL_EVENT_INPUT_ONLY</PURPOSE>
             <PROCESS_BOUNDARY>NETWORK_TO_HOST_APPLICATION_PROCESS</PROCESS_BOUNDARY>
+            <REQUEST_CONTENT_TYPE>application/json</REQUEST_CONTENT_TYPE>
+            <REQUEST_SERIALIZATION>JSON</REQUEST_SERIALIZATION>
+            <REQUEST_DECODER>GO_STANDARD_LIBRARY_ENCODING_JSON</REQUEST_DECODER>
+            <REQUEST_BODY_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
+            <MULTIPART_FORM_DATA>NONE</MULTIPART_FORM_DATA>
+            <FILE_CONTENT_TRANSFER>NONE</FILE_CONTENT_TRANSFER>
             <DECODED_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
             <INSTANCE_BINDING>EXPLICIT_HARNES_PERCEPTION_INSTANCE</INSTANCE_BINDING>
             <EVENT_DISPATCH>COMMAND_TO_CONTROL_EVENT_LOOP</EVENT_DISPATCH>
             <ORCHESTRATOR_OPERATION_ACCESS>NONE</ORCHESTRATOR_OPERATION_ACCESS>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                HTTP используется только для получения входных событий от внешних
-                источников. Обработчик передаёт принятое событие управляющему event loop
+                HTTP используется только для получения JSON-событий от внешних источников.
+                Тело запроса с Content-Type application/json содержит source_id, importance,
+                data и необязательный artifact как относительный путь либо массив
+                относительных путей. Содержимое файлов через HTTP не передаётся.
+                Обработчик декодирует JSON, передаёт событие управляющему event loop
                 того же экземпляра и не изменяет очередь напрямую. Операции управления
                 очередью и получение готового наблюдения через Next() через HTTP
                 не предоставляются.
@@ -258,6 +279,7 @@
                 <ENTITY ref="ENTITY-PERCEPTION-INPUT-EVENT" />
                 <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
                 <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ARTIFACT-LINK" />
             </TRACES_TO>
         </HTTP_EVENT_INGRESS>
 
