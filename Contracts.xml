@@ -95,4 +95,70 @@
             <REQUIREMENT ref="REQ-PERCEPTION-READY-RETENTION" />
         </TRACES_TO>
     </PUBLIC_GO_API>
+
+    <PUBLIC_DATA_TYPES id="CONTRACT-PUBLIC-DATA-TYPES" status="APPROVED_BY_OWNER">
+        <IMPORTANCE_TYPE id="CONTRACT-TYPE-IMPORTANCE">
+            <DECLARATION>type Importance string</DECLARATION>
+            <CONSTANTS>
+                <CONSTANT name="ImportanceLow" value="low" />
+                <CONSTANT name="ImportanceMedium" value="medium" />
+                <CONSTANT name="ImportanceHigh" value="high" />
+            </CONSTANTS>
+            <VALID_VALUES>low medium high</VALID_VALUES>
+            <PASSTHROUGH>UNCHANGED_FROM_ACCEPTED_EVENT</PASSTHROUGH>
+        </IMPORTANCE_TYPE>
+
+        <ARTIFACT_REF_TYPE id="CONTRACT-TYPE-ARTIFACT-REF">
+            <DECLARATION>type ArtifactRef string</DECLARATION>
+            <SEMANTICS>CLEANED_RELATIVE_PATH_WITHIN_CONFIG_ARTIFACT_DIR</SEMANTICS>
+            <TARGET>EXISTING_REGULAR_FILE</TARGET>
+            <SYMLINKS>PROHIBITED</SYMLINKS>
+            <FILE_COPYING>NONE</FILE_COPYING>
+        </ARTIFACT_REF_TYPE>
+
+        <OBSERVATION_TYPE id="CONTRACT-TYPE-OBSERVATION">
+            <DECLARATION>type Observation struct { SourceID string; Importance Importance; ReceivedAt time.Time; Data any; Artifacts []ArtifactRef }</DECLARATION>
+            <JSON_TAGS>NONE</JSON_TAGS>
+
+            <FIELD name="SourceID">
+                <GO_TYPE>string</GO_TYPE>
+                <SEMANTICS>EXTERNAL_SOURCE_ID</SEMANTICS>
+            </FIELD>
+            <FIELD name="Importance">
+                <GO_TYPE>Importance</GO_TYPE>
+                <SEMANTICS>UNCHANGED_ACCEPTED_IMPORTANCE</SEMANTICS>
+            </FIELD>
+            <FIELD name="ReceivedAt">
+                <GO_TYPE>time.Time</GO_TYPE>
+                <SEMANTICS>INITIAL_EVENT_ACCEPTANCE_TIME</SEMANTICS>
+                <REPROCESSING>PRESERVE_ORIGINAL_VALUE</REPROCESSING>
+            </FIELD>
+            <FIELD name="Data">
+                <GO_TYPE>any</GO_TYPE>
+                <ALLOWED_TREE>nil bool string json.Number []any map[string]any</ALLOWED_TREE>
+                <SEMANTIC_ENRICHMENT>NONE</SEMANTIC_ENRICHMENT>
+            </FIELD>
+            <FIELD name="Artifacts">
+                <GO_TYPE>[]ArtifactRef</GO_TYPE>
+                <NO_ARTIFACTS>NIL_OR_EMPTY_SLICE</NO_ARTIFACTS>
+            </FIELD>
+        </OBSERVATION_TYPE>
+
+        <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+
+        <TRACES_TO>
+            <DEVELOPMENT_WORK_ITEM ref="DP-WORK-CONTRACT-DATA" />
+            <TECHNOLOGY ref="TECH-TYPED-GO-CANONICAL-OBSERVATION" />
+            <TECHNOLOGY ref="TECH-UNIVERSAL-GO-JSON-VALUE-TREE" />
+            <TECHNOLOGY ref="TECH-PROCESS-SYSTEM-CLOCK" />
+            <TECHNOLOGY ref="TECH-LOCAL-FILE-ARTIFACTS" />
+            <REQUIREMENT ref="REQ-PERCEPTION-SOURCE-ID" />
+            <REQUIREMENT ref="REQ-PERCEPTION-RECEIPT-TIMESTAMP" />
+            <REQUIREMENT ref="REQ-PERCEPTION-ARTIFACT-LINK" />
+            <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-LEVELS" />
+            <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH" />
+            <INVARIANT ref="INV-PERCEPTION-IMPORTANCE-UNCHANGED" />
+            <INVARIANT ref="INV-PERCEPTION-ARRIVAL-TIME-UNCHANGED" />
+        </TRACES_TO>
+    </PUBLIC_DATA_TYPES>
 </CONTRACTS>
