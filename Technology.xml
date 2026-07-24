@@ -167,6 +167,30 @@
             </TRACES_TO>
         </CONCURRENCY_MODEL>
 
+        <INSTANCE_LIFECYCLE id="TECH-EXPLICIT-INSTANCE-LIFECYCLE">
+            <START_TRIGGER>SUCCESSFUL_INSTANCE_CONSTRUCTION</START_TRIGGER>
+            <EVENT_LOOP_START>AUTOMATIC_ON_SUCCESSFUL_CONSTRUCTION</EVENT_LOOP_START>
+            <SEPARATE_START_OPERATION>NONE</SEPARATE_START_OPERATION>
+            <SHUTDOWN_TRIGGER>EXPLICIT_INSTANCE_CLOSE</SHUTDOWN_TRIGGER>
+            <NEW_COMMAND_ACCEPTANCE_AFTER_CLOSE>NONE</NEW_COMMAND_ACCEPTANCE_AFTER_CLOSE>
+            <ACTIVE_WORKER_ON_CLOSE>CANCEL_VIA_CONTEXT</ACTIVE_WORKER_ON_CLOSE>
+            <EVENT_LOOP_ON_CLOSE>STOP</EVENT_LOOP_ON_CLOSE>
+            <CLOSE_COMPLETION>AFTER_EVENT_LOOP_AND_WORKER_TERMINATION</CLOSE_COMPLETION>
+            <REPEATED_CLOSE>SAFE</REPEATED_CLOSE>
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                Управляющий event loop запускается при успешном создании экземпляра;
+                отдельная операция запуска не требуется. Явное закрытие экземпляра
+                прекращает приём новых команд, отменяет активную worker через context.Context
+                и завершается после остановки event loop и worker. Повторное закрытие безопасно.
+            </RATIONALE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ATOMIC-PROCESSING" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE" />
+            </TRACES_TO>
+        </INSTANCE_LIFECYCLE>
+
         <CANCELLATION_CONTROL id="TECH-CONTEXT-CANCELLATION">
             <MECHANISM>context.Context</MECHANISM>
             <CANCELLATION>SUPPORTED</CANCELLATION>
@@ -303,6 +327,10 @@
             <IMPORT_MODE>GO_MODULE_IMPORT</IMPORT_MODE>
             <INSTANCE_MODEL>EXPLICIT_INSTANCE</INSTANCE_MODEL>
             <INSTANCE_CONSTRUCTION>HOST_APPLICATION_CREATES_INSTANCE</INSTANCE_CONSTRUCTION>
+            <INSTANCE_START>AUTOMATIC_ON_SUCCESSFUL_CONSTRUCTION</INSTANCE_START>
+            <SEPARATE_START_OPERATION>NONE</SEPARATE_START_OPERATION>
+            <INSTANCE_SHUTDOWN>EXPLICIT_CLOSE</INSTANCE_SHUTDOWN>
+            <LIFECYCLE ref="TECH-EXPLICIT-INSTANCE-LIFECYCLE" />
             <STATE_OWNERSHIP>INSTANCE_OWNS_UNIFIED_QUEUE</STATE_OWNERSHIP>
             <HTTP_INGRESS_BINDING>SAME_INSTANCE</HTTP_INGRESS_BINDING>
             <NEXT_BINDING>SAME_INSTANCE</NEXT_BINDING>
@@ -334,6 +362,10 @@
                 работают через один и тот же экземпляр, который владеет своей очередью.
                 Несколько экземпляров не разделяют состояние. Глобальный singleton и
                 автоматический запуск HTTP listener пакетом не используются.
+                Event loop запускается при успешном создании экземпляра без отдельного Start().
+                Явное закрытие прекращает приём новых команд, отменяет активную worker
+                и ожидает завершения event loop и worker. Повторное закрытие экземпляра
+                является безопасным.
             </RATIONALE>
             <TRACES_TO>
                 <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
@@ -354,6 +386,7 @@
         <COMPONENT_FORM>IMPORTABLE_GO_PACKAGE</COMPONENT_FORM>
         <INTEGRATION_MODE>IN_PROCESS_GO_IMPORT</INTEGRATION_MODE>
         <INSTANCE_MODEL>EXPLICIT_INSTANCE</INSTANCE_MODEL>
+        <LIFECYCLE ref="TECH-EXPLICIT-INSTANCE-LIFECYCLE" />
         <STATE_SCOPE>PER_INSTANCE</STATE_SCOPE>
         <GLOBAL_SINGLETON>NONE</GLOBAL_SINGLETON>
         <AUTOMATIC_HTTP_LISTENER>NONE</AUTOMATIC_HTTP_LISTENER>
