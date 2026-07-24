@@ -206,6 +206,7 @@
             <PURPOSE>EXTERNAL_EVENT_INPUT_ONLY</PURPOSE>
             <PROCESS_BOUNDARY>NETWORK_TO_HOST_APPLICATION_PROCESS</PROCESS_BOUNDARY>
             <DECODED_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
+            <INSTANCE_BINDING>EXPLICIT_HARNES_PERCEPTION_INSTANCE</INSTANCE_BINDING>
             <ORCHESTRATOR_OPERATION_ACCESS>NONE</ORCHESTRATOR_OPERATION_ACCESS>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
@@ -226,6 +227,14 @@
             <MECHANISM>DIRECT_GO_CALL</MECHANISM>
             <PROCESS_BOUNDARY>IN_PROCESS</PROCESS_BOUNDARY>
             <IMPORT_MODE>GO_MODULE_IMPORT</IMPORT_MODE>
+            <INSTANCE_MODEL>EXPLICIT_INSTANCE</INSTANCE_MODEL>
+            <INSTANCE_CONSTRUCTION>HOST_APPLICATION_CREATES_INSTANCE</INSTANCE_CONSTRUCTION>
+            <STATE_OWNERSHIP>INSTANCE_OWNS_UNIFIED_QUEUE</STATE_OWNERSHIP>
+            <HTTP_INGRESS_BINDING>SAME_INSTANCE</HTTP_INGRESS_BINDING>
+            <NEXT_BINDING>SAME_INSTANCE</NEXT_BINDING>
+            <INSTANCE_ISOLATION>INDEPENDENT_STATE_PER_INSTANCE</INSTANCE_ISOLATION>
+            <GLOBAL_SINGLETON>NONE</GLOBAL_SINGLETON>
+            <AUTOMATIC_HTTP_LISTENER>NONE</AUTOMATIC_HTTP_LISTENER>
             <CALLER>HOST_PROJECT_ORCHESTRATOR</CALLER>
             <ORCHESTRATOR_OPERATION>NEXT</ORCHESTRATOR_OPERATION>
             <NEXT_REQUEST_INITIATOR>HOST_PROJECT_ORCHESTRATOR</NEXT_REQUEST_INITIATOR>
@@ -243,6 +252,10 @@
                 первого READY-события в порядке единой очереди либо немедленное отсутствие
                 результата. harnes-perception не вызывает оркестратор и не импортирует
                 Google ADK Go как собственную зависимость.
+                Экземпляр явно создаётся использующим приложением. HTTP-вход и Next()
+                работают через один и тот же экземпляр, который владеет своей очередью.
+                Несколько экземпляров не разделяют состояние. Глобальный singleton и
+                автоматический запуск HTTP listener пакетом не используются.
             </RATIONALE>
             <TRACES_TO>
                 <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
@@ -262,6 +275,10 @@
         <PATH>github.com/bogachenko/harnes-perception</PATH>
         <COMPONENT_FORM>IMPORTABLE_GO_PACKAGE</COMPONENT_FORM>
         <INTEGRATION_MODE>IN_PROCESS_GO_IMPORT</INTEGRATION_MODE>
+        <INSTANCE_MODEL>EXPLICIT_INSTANCE</INSTANCE_MODEL>
+        <STATE_SCOPE>PER_INSTANCE</STATE_SCOPE>
+        <GLOBAL_SINGLETON>NONE</GLOBAL_SINGLETON>
+        <AUTOMATIC_HTTP_LISTENER>NONE</AUTOMATIC_HTTP_LISTENER>
         <DEPLOYMENT_UNIT>HOST_APPLICATION_PROCESS</DEPLOYMENT_UNIT>
         <STANDALONE_PROCESS>NONE</STANDALONE_PROCESS>
         <STANDALONE_HTTP_SERVICE>NONE</STANDALONE_HTTP_SERVICE>
@@ -270,6 +287,9 @@
             harnes-perception поставляется как импортируемый Go-пакет и работает
             внутри процесса использующего его приложения. HTTP применяется только
             для входных внешних событий; Next() вызывается напрямую через Go API.
+            Состояние принадлежит явно созданному экземпляру пакета. HTTP-вход и Next()
+            предоставляются этим экземпляром; пакет не создаёт глобальный экземпляр
+            и не запускает HTTP listener автоматически.
         </RATIONALE>
         <LANGUAGE ref="TECH-LANGUAGE-GO" />
     </MODULE_IDENTITY>
