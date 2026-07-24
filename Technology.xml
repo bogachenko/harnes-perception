@@ -123,15 +123,50 @@
             </TRACES_TO>
         </EVENT_QUEUE>
 
+        <CONCURRENCY_MODEL id="TECH-CONTROL-EVENT-LOOP">
+            <MODEL>SINGLE_OWNER_EVENT_LOOP</MODEL>
+            <OWNER>ONE_GOROUTINE_PER_INSTANCE</OWNER>
+            <OWNED_STATE>UNIFIED_QUEUE_AND_EVENT_STATES</OWNED_STATE>
+            <STATE_ACCESS>EVENT_LOOP_ONLY</STATE_ACCESS>
+            <INGRESS_COMMAND_TRANSPORT>GO_CHANNEL</INGRESS_COMMAND_TRANSPORT>
+            <NEXT_COMMAND_TRANSPORT>GO_CHANNEL</NEXT_COMMAND_TRANSPORT>
+            <WORKER_RESULT_TRANSPORT>GO_CHANNEL</WORKER_RESULT_TRANSPORT>
+            <NORMALIZATION_EXECUTION>SEPARATE_WORKER_GOROUTINE</NORMALIZATION_EXECUTION>
+            <ACTIVE_NORMALIZATION_WORKERS>AT_MOST_ONE_PER_INSTANCE</ACTIVE_NORMALIZATION_WORKERS>
+            <EVENT_LOOP_BLOCKED_BY_NORMALIZATION>NO</EVENT_LOOP_BLOCKED_BY_NORMALIZATION>
+            <PREEMPTION_CONTROL ref="TECH-CONTEXT-CANCELLATION" />
+            <DIRECT_QUEUE_ACCESS_OUTSIDE_EVENT_LOOP>NONE</DIRECT_QUEUE_ACCESS_OUTSIDE_EVENT_LOOP>
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                Одна управляющая goroutine экземпляра эксклюзивно владеет единой
+                очередью и состояниями событий. HTTP-вход, вызовы Next() и результаты
+                worker передаются ей командами через Go channels. Нормализация
+                выполняется отдельной worker goroutine, поэтому event loop продолжает
+                принимать новые события и при поступлении более важного события
+                отменяет текущую нормализацию через context.Context.
+            </RATIONALE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ATOMIC-PROCESSING" />
+                <REQUIREMENT ref="REQ-PERCEPTION-SINGLE-QUEUE" />
+                <REQUIREMENT ref="REQ-PERCEPTION-NEXT-PULL" />
+                <REQUIREMENT ref="REQ-PERCEPTION-NEXT-WITHOUT-READY" />
+                <INVARIANT ref="INV-PERCEPTION-NO-PARTIAL-OBSERVATION" />
+            </TRACES_TO>
+        </CONCURRENCY_MODEL>
+
         <CANCELLATION_CONTROL id="TECH-CONTEXT-CANCELLATION">
             <MECHANISM>context.Context</MECHANISM>
             <CANCELLATION>SUPPORTED</CANCELLATION>
             <LIBRARY>GO_STANDARD_LIBRARY_CONTEXT</LIBRARY>
             <PROCESS_BOUNDARY>IN_PROCESS</PROCESS_BOUNDARY>
+            <CANCELLATION_REQUEST_SOURCE ref="TECH-CONTROL-EVENT-LOOP" />
+            <CANCELLATION_TARGET>ACTIVE_NORMALIZATION_WORKER</CANCELLATION_TARGET>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                Полная отмена текущей обработки выполняется стандартным
-                механизмом context.Context с отменой.
+                Управляющий event loop отменяет активную worker goroutine
+                стандартным механизмом context.Context. Отменённая worker
+                не изменяет очередь или состояние события напрямую.
             </RATIONALE>
             <TRACES_TO>
                 <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
@@ -207,12 +242,15 @@
             <PROCESS_BOUNDARY>NETWORK_TO_HOST_APPLICATION_PROCESS</PROCESS_BOUNDARY>
             <DECODED_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
             <INSTANCE_BINDING>EXPLICIT_HARNES_PERCEPTION_INSTANCE</INSTANCE_BINDING>
+            <EVENT_DISPATCH>COMMAND_TO_CONTROL_EVENT_LOOP</EVENT_DISPATCH>
             <ORCHESTRATOR_OPERATION_ACCESS>NONE</ORCHESTRATOR_OPERATION_ACCESS>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
                 HTTP используется только для получения входных событий от внешних
-                источников. Операции управления очередью и получение готового
-                наблюдения через Next() через HTTP не предоставляются.
+                источников. Обработчик передаёт принятое событие управляющему event loop
+                того же экземпляра и не изменяет очередь напрямую. Операции управления
+                очередью и получение готового наблюдения через Next() через HTTP
+                не предоставляются.
             </RATIONALE>
             <TRACES_TO>
                 <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
@@ -232,6 +270,9 @@
             <STATE_OWNERSHIP>INSTANCE_OWNS_UNIFIED_QUEUE</STATE_OWNERSHIP>
             <HTTP_INGRESS_BINDING>SAME_INSTANCE</HTTP_INGRESS_BINDING>
             <NEXT_BINDING>SAME_INSTANCE</NEXT_BINDING>
+            <COMMAND_DISPATCH>CONTROL_EVENT_LOOP</COMMAND_DISPATCH>
+            <CONCURRENCY_MODEL ref="TECH-CONTROL-EVENT-LOOP" />
+            <QUEUE_ACCESS>CONTROL_EVENT_LOOP_ONLY</QUEUE_ACCESS>
             <INSTANCE_ISOLATION>INDEPENDENT_STATE_PER_INSTANCE</INSTANCE_ISOLATION>
             <GLOBAL_SINGLETON>NONE</GLOBAL_SINGLETON>
             <AUTOMATIC_HTTP_LISTENER>NONE</AUTOMATIC_HTTP_LISTENER>
@@ -248,10 +289,11 @@
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
                 Проект импортирует harnes-perception как Go-модуль и вызывает Next()
-                напрямую из Go-кода внутри того же процесса. Пакет возвращает наблюдение
-                первого READY-события в порядке единой очереди либо немедленное отсутствие
-                результата. harnes-perception не вызывает оркестратор и не импортирует
-                Google ADK Go как собственную зависимость.
+                напрямую из Go-кода внутри того же процесса. Вызов передаётся командой
+                управляющему event loop и не обращается к очереди напрямую. Пакет
+                возвращает наблюдение первого READY-события в порядке единой очереди
+                либо немедленное отсутствие результата. harnes-perception не инициирует
+                вызовы оркестратора и не импортирует Google ADK Go как собственную зависимость.
                 Экземпляр явно создаётся использующим приложением. HTTP-вход и Next()
                 работают через один и тот же экземпляр, который владеет своей очередью.
                 Несколько экземпляров не разделяют состояние. Глобальный singleton и
