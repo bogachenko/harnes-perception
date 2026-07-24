@@ -49,12 +49,12 @@
     <DATA_REPRESENTATION id="TECH-DATA-REPRESENTATION">
         <INPUT_EVENT id="TECH-TYPED-GO-INPUT-EVENT">
             <TRANSPORT_SOURCE>HTTP_REQUEST</TRANSPORT_SOURCE>
-            <DECODING_LOCATION>HARNES_PERCEPTION_HTTP_SERVER</DECODING_LOCATION>
+            <DECODING_LOCATION>HARNES_PERCEPTION_HTTP_INGRESS</DECODING_LOCATION>
             <REPRESENTATION>TYPED_GO_VALUE_AFTER_HTTP_DECODING</REPRESENTATION>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                HTTP-сервер harnes-perception принимает внешнее событие,
-                декодирует его транспортное представление внутри сервиса
+                Импортируемый пакет harnes-perception принимает внешнее событие
+                через HTTP-вход, декодирует его транспортное представление
                 и передаёт на обработку типизированное значение Go.
             </RATIONALE>
             <TRACES_TO>
@@ -68,8 +68,8 @@
             <REPRESENTATION>TYPED_GO_STRUCT</REPRESENTATION>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                Внутри сервиса harnes-perception формирует каноническое наблюдение
-                как типизированную Go-структуру.
+                Импортированный пакет harnes-perception формирует каноническое
+                наблюдение как типизированную Go-структуру внутри процесса приложения.
             </RATIONALE>
             <TRACES_TO>
                 <OUTPUT ref="OUTPUT-CANONICAL-OBSERVATION" />
@@ -95,7 +95,7 @@
 
     <INFRASTRUCTURE id="TECH-INFRASTRUCTURE">
         <EVENT_QUEUE id="TECH-IN-PROCESS-EVENT-QUEUE">
-            <LOCATION>GO_PROCESS</LOCATION>
+            <LOCATION>HOST_APPLICATION_GO_PROCESS</LOCATION>
             <QUEUE_SCOPE>SINGLE_UNIFIED_EVENT_QUEUE</QUEUE_SCOPE>
             <READY_STORAGE>SAME_QUEUE</READY_STORAGE>
             <READY_SELECTION>FIRST_READY_IN_QUEUE_ORDER</READY_SELECTION>
@@ -104,10 +104,10 @@
             <DATABASE>NONE</DATABASE>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                Единая очередь событий размещается внутри процесса Go без внешнего
-                брокера и базы данных. События в состоянии READY остаются в этой же
-                очереди до успешной выдачи через Next(). Next() выбирает первое
-                READY-событие согласно установленному порядку единой очереди.
+                Единая очередь событий размещается внутри Go-процесса приложения,
+                импортировавшего harnes-perception, без внешнего брокера и базы данных.
+                События в состоянии READY остаются в этой же очереди до успешной выдачи
+                через Next(), который вызывается непосредственно из Go-кода приложения.
             </RATIONALE>
             <TRACES_TO>
                 <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-ORDER" />
@@ -200,53 +200,76 @@
         </TRACES_TO>
     </SECURITY>
 
-    <INTEGRATION_INTERFACE id="TECH-HTTP-SERVER-API">
-        <MECHANISM>HTTP_SERVER</MECHANISM>
-        <PROCESS_BOUNDARY>INTER_PROCESS_OVER_NETWORK</PROCESS_BOUNDARY>
-        <INTERNAL_INPUT_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
-        <INTERNAL_OUTPUT_REPRESENTATION ref="TECH-TYPED-GO-CANONICAL-OBSERVATION" />
-        <ORCHESTRATOR_INTERACTION>ORCHESTRATOR_PULL</ORCHESTRATOR_INTERACTION>
-        <ORCHESTRATOR_OPERATION>NEXT</ORCHESTRATOR_OPERATION>
-        <NEXT_REQUEST_INITIATOR>EXTERNAL_ORCHESTRATOR</NEXT_REQUEST_INITIATOR>
-        <NEXT_READY_SELECTION>FIRST_READY_IN_UNIFIED_QUEUE_ORDER</NEXT_READY_SELECTION>
-        <NEXT_WITHOUT_READY>IMMEDIATE_NO_RESULT</NEXT_WITHOUT_READY>
-        <NEXT_WAITING>NONE</NEXT_WAITING>
-        <SERVICE_INITIATED_ORCHESTRATOR_CALLS>NONE</SERVICE_INITIATED_ORCHESTRATOR_CALLS>
-        <DIRECT_GOOGLE_ADK_DEPENDENCY>NONE</DIRECT_GOOGLE_ADK_DEPENDENCY>
-        <ORCHESTRATOR_BOUNDARY>EXTERNAL_TO_HARNES_PERCEPTION</ORCHESTRATOR_BOUNDARY>
-        <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
-        <RATIONALE>
-            harnes-perception работает как самостоятельный Go-сервис и принимает
-            внешние события через собственный HTTP-сервер. Внешний оркестратор
-            самостоятельно вызывает операцию Next() этого сервиса. harnes-perception
-            возвращает наблюдение первого READY-события в порядке единой очереди,
-            а при отсутствии READY-событий немедленно возвращает отсутствие результата.
-            Сервис не инициирует вызовы оркестратора и не зависит от Google ADK Go.
-        </RATIONALE>
-        <TRACES_TO>
-            <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
-            <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
-            <OUTPUT ref="OUTPUT-CANONICAL-OBSERVATION" />
-            <OUTPUT ref="OUTPUT-NO-READY-OBSERVATION" />
-            <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
-            <USE_CASE ref="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
-            <REQUIREMENT ref="REQ-PERCEPTION-SINGLE-QUEUE" />
-            <REQUIREMENT ref="REQ-PERCEPTION-READY-RETENTION" />
-            <REQUIREMENT ref="REQ-PERCEPTION-NEXT-PULL" />
-            <REQUIREMENT ref="REQ-PERCEPTION-NEXT-WITHOUT-READY" />
-            <REQUIREMENT ref="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE" />
-        </TRACES_TO>
-    </INTEGRATION_INTERFACE>
+    <INTEGRATION_INTERFACES id="TECH-INTEGRATION-INTERFACES">
+        <HTTP_EVENT_INGRESS id="TECH-HTTP-EVENT-INGRESS">
+            <MECHANISM>HTTP_INGRESS</MECHANISM>
+            <PURPOSE>EXTERNAL_EVENT_INPUT_ONLY</PURPOSE>
+            <PROCESS_BOUNDARY>NETWORK_TO_HOST_APPLICATION_PROCESS</PROCESS_BOUNDARY>
+            <DECODED_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
+            <ORCHESTRATOR_OPERATION_ACCESS>NONE</ORCHESTRATOR_OPERATION_ACCESS>
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                HTTP используется только для получения входных событий от внешних
+                источников. Операции управления очередью и получение готового
+                наблюдения через Next() через HTTP не предоставляются.
+            </RATIONALE>
+            <TRACES_TO>
+                <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
+                <INPUT ref="INPUT-EXTERNAL-EVENT" />
+                <ENTITY ref="ENTITY-PERCEPTION-INPUT-EVENT" />
+                <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
+                <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
+            </TRACES_TO>
+        </HTTP_EVENT_INGRESS>
+
+        <IN_PROCESS_GO_API id="TECH-IN-PROCESS-GO-API">
+            <MECHANISM>DIRECT_GO_CALL</MECHANISM>
+            <PROCESS_BOUNDARY>IN_PROCESS</PROCESS_BOUNDARY>
+            <IMPORT_MODE>GO_MODULE_IMPORT</IMPORT_MODE>
+            <CALLER>HOST_PROJECT_ORCHESTRATOR</CALLER>
+            <ORCHESTRATOR_OPERATION>NEXT</ORCHESTRATOR_OPERATION>
+            <NEXT_REQUEST_INITIATOR>HOST_PROJECT_ORCHESTRATOR</NEXT_REQUEST_INITIATOR>
+            <NEXT_READY_SELECTION>FIRST_READY_IN_UNIFIED_QUEUE_ORDER</NEXT_READY_SELECTION>
+            <NEXT_WITHOUT_READY>IMMEDIATE_NO_RESULT</NEXT_WITHOUT_READY>
+            <NEXT_WAITING>NONE</NEXT_WAITING>
+            <PACKAGE_INITIATED_ORCHESTRATOR_CALLS>NONE</PACKAGE_INITIATED_ORCHESTRATOR_CALLS>
+            <DIRECT_GOOGLE_ADK_DEPENDENCY>NONE</DIRECT_GOOGLE_ADK_DEPENDENCY>
+            <ORCHESTRATOR_BOUNDARY>SEPARATE_COMPONENT_SAME_PROCESS</ORCHESTRATOR_BOUNDARY>
+            <RETURN_REPRESENTATION ref="TECH-TYPED-GO-CANONICAL-OBSERVATION" />
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                Проект импортирует harnes-perception как Go-модуль и вызывает Next()
+                напрямую из Go-кода внутри того же процесса. Пакет возвращает наблюдение
+                первого READY-события в порядке единой очереди либо немедленное отсутствие
+                результата. harnes-perception не вызывает оркестратор и не импортирует
+                Google ADK Go как собственную зависимость.
+            </RATIONALE>
+            <TRACES_TO>
+                <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
+                <OUTPUT ref="OUTPUT-CANONICAL-OBSERVATION" />
+                <OUTPUT ref="OUTPUT-NO-READY-OBSERVATION" />
+                <USE_CASE ref="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-SINGLE-QUEUE" />
+                <REQUIREMENT ref="REQ-PERCEPTION-READY-RETENTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-NEXT-PULL" />
+                <REQUIREMENT ref="REQ-PERCEPTION-NEXT-WITHOUT-READY" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE" />
+            </TRACES_TO>
+        </IN_PROCESS_GO_API>
+    </INTEGRATION_INTERFACES>
 
     <MODULE_IDENTITY id="TECH-MODULE-HARNES-PERCEPTION">
         <PATH>github.com/bogachenko/harnes-perception</PATH>
-        <COMPONENT_FORM>GO_SERVICE</COMPONENT_FORM>
-        <INTEGRATION_MODE>STANDALONE_HTTP_SERVICE</INTEGRATION_MODE>
-        <DEPLOYMENT_UNIT>STANDALONE_PROCESS</DEPLOYMENT_UNIT>
+        <COMPONENT_FORM>IMPORTABLE_GO_PACKAGE</COMPONENT_FORM>
+        <INTEGRATION_MODE>IN_PROCESS_GO_IMPORT</INTEGRATION_MODE>
+        <DEPLOYMENT_UNIT>HOST_APPLICATION_PROCESS</DEPLOYMENT_UNIT>
+        <STANDALONE_PROCESS>NONE</STANDALONE_PROCESS>
+        <STANDALONE_HTTP_SERVICE>NONE</STANDALONE_HTTP_SERVICE>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
         <RATIONALE>
-            harnes-perception поставляется и запускается как самостоятельный
-            Go-сервис с собственным HTTP-сервером.
+            harnes-perception поставляется как импортируемый Go-пакет и работает
+            внутри процесса использующего его приложения. HTTP применяется только
+            для входных внешних событий; Next() вызывается напрямую через Go API.
         </RATIONALE>
         <LANGUAGE ref="TECH-LANGUAGE-GO" />
     </MODULE_IDENTITY>
