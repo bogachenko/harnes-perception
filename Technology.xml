@@ -58,6 +58,8 @@
             <IMPORTANCE_JSON_FIELD>importance</IMPORTANCE_JSON_FIELD>
             <DATA_JSON_FIELD>data</DATA_JSON_FIELD>
             <DATA_JSON_VALUE>ANY_JSON_VALUE</DATA_JSON_VALUE>
+            <DATA_JSON_DECODER_CONFIGURATION>Decoder.UseNumber</DATA_JSON_DECODER_CONFIGURATION>
+            <DATA_JSON_NUMBER_REPRESENTATION>json.Number</DATA_JSON_NUMBER_REPRESENTATION>
             <ARTIFACT_JSON_FIELD>artifact</ARTIFACT_JSON_FIELD>
             <ARTIFACT_JSON_VALUE>RELATIVE_PATH_STRING_OR_ARRAY_OF_RELATIVE_PATH_STRINGS</ARTIFACT_JSON_VALUE>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
@@ -67,6 +69,8 @@
                 Go encoding/json. JSON содержит source_id, importance, data как
                 JSON-значение и необязательный artifact как относительный путь либо
                 массив относительных путей внутри настроенной локальной директории.
+                Для декодирования data применяется Decoder.UseNumber, поэтому JSON-числа
+                представлены значениями json.Number без автоматического преобразования в float64.
             </RATIONALE>
             <TRACES_TO>
                 <INPUT ref="INPUT-EXTERNAL-EVENT" />
@@ -76,8 +80,33 @@
             </TRACES_TO>
         </INPUT_EVENT>
 
+        <NORMALIZED_DATA id="TECH-UNIVERSAL-GO-JSON-VALUE-TREE">
+            <REPRESENTATION>UNIVERSAL_GO_JSON_VALUE_TREE</REPRESENTATION>
+            <NULL_REPRESENTATION>nil</NULL_REPRESENTATION>
+            <BOOLEAN_REPRESENTATION>bool</BOOLEAN_REPRESENTATION>
+            <STRING_REPRESENTATION>string</STRING_REPRESENTATION>
+            <NUMBER_REPRESENTATION>json.Number</NUMBER_REPRESENTATION>
+            <ARRAY_REPRESENTATION>[]any</ARRAY_REPRESENTATION>
+            <OBJECT_REPRESENTATION>map[string]any</OBJECT_REPRESENTATION>
+            <JSON_DECODER_CONFIGURATION>Decoder.UseNumber</JSON_DECODER_CONFIGURATION>
+            <SEMANTIC_ENRICHMENT>NONE</SEMANTIC_ENRICHMENT>
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+            <RATIONALE>
+                Поле data представляется универсальным деревом JSON-значений на стандартных
+                типах Go: null как nil, boolean как bool, string как string, number как
+                json.Number, array как []any и object как map[string]any. Представление
+                сохраняет различия JSON-типов и не дополняет смысл исходных данных.
+            </RATIONALE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
+                <OUTPUT ref="OUTPUT-CANONICAL-OBSERVATION" />
+                <ENTITY ref="ENTITY-PERCEPTION-CANONICAL-OBSERVATION" />
+            </TRACES_TO>
+        </NORMALIZED_DATA>
+
         <CANONICAL_OBSERVATION id="TECH-TYPED-GO-CANONICAL-OBSERVATION">
             <REPRESENTATION>TYPED_GO_STRUCT</REPRESENTATION>
+            <DATA_REPRESENTATION ref="TECH-UNIVERSAL-GO-JSON-VALUE-TREE" />
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
                 Импортированный пакет harnes-perception формирует каноническое
