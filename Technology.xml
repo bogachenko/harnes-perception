@@ -174,6 +174,8 @@
             <INGRESS_COMPLETION>AFTER_EVENT_LOOP_ACCEPT_OR_REJECT</INGRESS_COMPLETION>
             <NEXT_COMMAND_TRANSPORT>GO_CHANNEL</NEXT_COMMAND_TRANSPORT>
             <WORKER_RESULT_TRANSPORT>GO_CHANNEL</WORKER_RESULT_TRANSPORT>
+            <WORKER_RESULT_OUTCOMES>SUCCESS_PREEMPTED_FAILED</WORKER_RESULT_OUTCOMES>
+            <WORKER_RESULT_OWNER>CONTROL_EVENT_LOOP</WORKER_RESULT_OWNER>
             <NORMALIZATION_EXECUTION>SEPARATE_WORKER_GOROUTINE</NORMALIZATION_EXECUTION>
             <ACTIVE_NORMALIZATION_WORKERS>AT_MOST_ONE_PER_INSTANCE</ACTIVE_NORMALIZATION_WORKERS>
             <EVENT_LOOP_BLOCKED_BY_NORMALIZATION>NO</EVENT_LOOP_BLOCKED_BY_NORMALIZATION>
@@ -187,6 +189,8 @@
                 выполняется отдельной worker goroutine, поэтому event loop продолжает
                 принимать новые события и при поступлении более важного события
                 отменяет текущую нормализацию через context.Context.
+                Event loop различает успешное завершение, отмену из-за preemption
+                и ошибку нормализации и применяет соответствующее изменение состояния.
                 Решение о принятии или отклонении входного события возвращается HTTP-входу
                 через Go channel до завершения запроса; нормализация для ответа не ожидается.
             </RATIONALE>
@@ -199,6 +203,36 @@
                 <INVARIANT ref="INV-PERCEPTION-NO-PARTIAL-OBSERVATION" />
             </TRACES_TO>
         </CONCURRENCY_MODEL>
+
+        <NORMALIZATION_RESULT_HANDLING id="TECH-NORMALIZATION-RESULT-HANDLING">
+            <RESULT_TRANSPORT>GO_CHANNEL</RESULT_TRANSPORT>
+            <RESULT_OWNER ref="TECH-CONTROL-EVENT-LOOP" />
+            <SUCCESS_EFFECT>ATOMIC_OBSERVATION_COMMIT_AND_EVENT_READY</SUCCESS_EFFECT>
+            <PREEMPTED_EFFECT>NO_OBSERVATION_EVENT_RETAINED_AND_RESTARTED_FROM_BEGINNING</PREEMPTED_EFFECT>
+            <FAILED_EFFECT>NO_OBSERVATION_AND_EVENT_REMOVED</FAILED_EFFECT>
+            <PARTIAL_OBSERVATION_COMMIT>NONE</PARTIAL_OBSERVATION_COMMIT>
+            <WORKER_QUEUE_MUTATION>NONE</WORKER_QUEUE_MUTATION>
+            <DECISION_BASIS>REQUIREMENTS_AND_APPROVED_CONCURRENCY_MODEL</DECISION_BASIS>
+            <RATIONALE>
+                Результат нормализации передаётся управляющему event loop, который
+                является единственным владельцем очереди и состояний событий.
+                При успехе каноническое наблюдение фиксируется атомарно, а событие
+                переходит в READY. При отмене из-за поступления более важного события
+                наблюдение не создаётся, событие остаётся в очереди и при следующем
+                выборе обрабатывается заново с начала. При ошибке обработки наблюдение
+                не создаётся, а событие удаляется из очереди. Worker не изменяет
+                очередь или состояние события напрямую.
+            </RATIONALE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-ATOMIC-PROCESSING" />
+                <REQUIREMENT ref="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-READY-RETENTION" />
+                <INVARIANT ref="INV-PERCEPTION-NO-PARTIAL-OBSERVATION" />
+                <INVARIANT ref="INV-PERCEPTION-REMOVAL-CONDITIONS" />
+                <EDGE_CASE ref="EDGE-PERCEPTION-HIGHER-IMPORTANCE-DURING-PROCESSING" />
+                <ERROR_CASE ref="ERR-PERCEPTION-PROCESSING-FAILED" />
+            </TRACES_TO>
+        </NORMALIZATION_RESULT_HANDLING>
 
         <INSTANCE_LIFECYCLE id="TECH-EXPLICIT-INSTANCE-LIFECYCLE">
             <START_TRIGGER>SUCCESSFUL_INSTANCE_CONSTRUCTION</START_TRIGGER>
