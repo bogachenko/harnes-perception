@@ -252,6 +252,16 @@
             <MECHANISM>HTTP_INGRESS</MECHANISM>
             <PURPOSE>EXTERNAL_EVENT_INPUT_ONLY</PURPOSE>
             <PROCESS_BOUNDARY>NETWORK_TO_HOST_APPLICATION_PROCESS</PROCESS_BOUNDARY>
+            <HTTP_HANDLER_INTERFACE>net/http.Handler</HTTP_HANDLER_INTERFACE>
+            <HTTP_HANDLER_LIBRARY>GO_STANDARD_LIBRARY_NET_HTTP</HTTP_HANDLER_LIBRARY>
+            <HANDLER_PROVIDER>EXPLICIT_HARNES_PERCEPTION_INSTANCE</HANDLER_PROVIDER>
+            <HANDLER_MOUNTING>HOST_APPLICATION</HANDLER_MOUNTING>
+            <HTTP_SERVER_OWNERSHIP>HOST_APPLICATION</HTTP_SERVER_OWNERSHIP>
+            <ROUTE_SELECTION>HOST_APPLICATION</ROUTE_SELECTION>
+            <LISTEN_ADDRESS_AND_PORT_SELECTION>HOST_APPLICATION</LISTEN_ADDRESS_AND_PORT_SELECTION>
+            <SERVER_LIFECYCLE>HOST_APPLICATION</SERVER_LIFECYCLE>
+            <DEFAULT_SERVE_MUX_REGISTRATION>NONE</DEFAULT_SERVE_MUX_REGISTRATION>
+            <PACKAGE_LISTENER_START>NONE</PACKAGE_LISTENER_START>
             <REQUEST_CONTENT_TYPE>application/json</REQUEST_CONTENT_TYPE>
             <REQUEST_SERIALIZATION>JSON</REQUEST_SERIALIZATION>
             <REQUEST_DECODER>GO_STANDARD_LIBRARY_ENCODING_JSON</REQUEST_DECODER>
@@ -268,6 +278,10 @@
                 Тело запроса с Content-Type application/json содержит source_id, importance,
                 data и необязательный artifact как относительный путь либо массив
                 относительных путей. Содержимое файлов через HTTP не передаётся.
+                Экземпляр предоставляет стандартный net/http.Handler. Использующее приложение
+                самостоятельно монтирует handler в собственный http.ServeMux и определяет route,
+                адрес, порт и жизненный цикл HTTP-сервера. Пакет не запускает listener
+                и не регистрирует handler в глобальном http.DefaultServeMux.
                 Обработчик декодирует JSON, передаёт событие управляющему event loop
                 того же экземпляра и не изменяет очередь напрямую. Операции управления
                 очередью и получение готового наблюдения через Next() через HTTP
