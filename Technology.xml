@@ -96,12 +96,18 @@
     <INFRASTRUCTURE id="TECH-INFRASTRUCTURE">
         <EVENT_QUEUE id="TECH-IN-PROCESS-EVENT-QUEUE">
             <LOCATION>GO_PROCESS</LOCATION>
+            <QUEUE_SCOPE>SINGLE_UNIFIED_EVENT_QUEUE</QUEUE_SCOPE>
+            <READY_STORAGE>SAME_QUEUE</READY_STORAGE>
+            <READY_SELECTION>FIRST_READY_IN_QUEUE_ORDER</READY_SELECTION>
+            <READY_RETENTION>UNTIL_SUCCESSFUL_NEXT_DELIVERY</READY_RETENTION>
             <EXTERNAL_BROKER>NONE</EXTERNAL_BROKER>
             <DATABASE>NONE</DATABASE>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
-                Очередь входных событий размещается внутри процесса Go
-                без внешнего брокера и базы данных.
+                Единая очередь событий размещается внутри процесса Go без внешнего
+                брокера и базы данных. События в состоянии READY остаются в этой же
+                очереди до успешной выдачи через Next(). Next() выбирает первое
+                READY-событие согласно установленному порядку единой очереди.
             </RATIONALE>
             <TRACES_TO>
                 <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-ORDER" />
@@ -109,6 +115,11 @@
                 <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
                 <REQUIREMENT ref="REQ-PERCEPTION-QUEUE-RETENTION" />
                 <REQUIREMENT ref="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-SINGLE-QUEUE" />
+                <REQUIREMENT ref="REQ-PERCEPTION-READY-RETENTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-NEXT-PULL" />
+                <REQUIREMENT ref="REQ-PERCEPTION-NEXT-WITHOUT-READY" />
+                <INVARIANT ref="INV-PERCEPTION-READY-RETAINED" />
             </TRACES_TO>
         </EVENT_QUEUE>
 
@@ -194,20 +205,36 @@
         <PROCESS_BOUNDARY>INTER_PROCESS_OVER_NETWORK</PROCESS_BOUNDARY>
         <INTERNAL_INPUT_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
         <INTERNAL_OUTPUT_REPRESENTATION ref="TECH-TYPED-GO-CANONICAL-OBSERVATION" />
+        <ORCHESTRATOR_INTERACTION>ORCHESTRATOR_PULL</ORCHESTRATOR_INTERACTION>
+        <ORCHESTRATOR_OPERATION>NEXT</ORCHESTRATOR_OPERATION>
+        <NEXT_REQUEST_INITIATOR>EXTERNAL_ORCHESTRATOR</NEXT_REQUEST_INITIATOR>
+        <NEXT_READY_SELECTION>FIRST_READY_IN_UNIFIED_QUEUE_ORDER</NEXT_READY_SELECTION>
+        <NEXT_WITHOUT_READY>IMMEDIATE_NO_RESULT</NEXT_WITHOUT_READY>
+        <NEXT_WAITING>NONE</NEXT_WAITING>
+        <SERVICE_INITIATED_ORCHESTRATOR_CALLS>NONE</SERVICE_INITIATED_ORCHESTRATOR_CALLS>
         <DIRECT_GOOGLE_ADK_DEPENDENCY>NONE</DIRECT_GOOGLE_ADK_DEPENDENCY>
         <ORCHESTRATOR_BOUNDARY>EXTERNAL_TO_HARNES_PERCEPTION</ORCHESTRATOR_BOUNDARY>
         <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
         <RATIONALE>
-            harnes-perception работает как самостоятельный Go-сервис
-            и принимает внешние события через собственный HTTP-сервер.
-            Оркестратор Google ADK Go остаётся внешним компонентом
-            и не является зависимостью сервиса.
+            harnes-perception работает как самостоятельный Go-сервис и принимает
+            внешние события через собственный HTTP-сервер. Внешний оркестратор
+            самостоятельно вызывает операцию Next() этого сервиса. harnes-perception
+            возвращает наблюдение первого READY-события в порядке единой очереди,
+            а при отсутствии READY-событий немедленно возвращает отсутствие результата.
+            Сервис не инициирует вызовы оркестратора и не зависит от Google ADK Go.
         </RATIONALE>
         <TRACES_TO>
             <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
             <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
+            <OUTPUT ref="OUTPUT-CANONICAL-OBSERVATION" />
+            <OUTPUT ref="OUTPUT-NO-READY-OBSERVATION" />
             <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
             <USE_CASE ref="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION" />
+            <REQUIREMENT ref="REQ-PERCEPTION-SINGLE-QUEUE" />
+            <REQUIREMENT ref="REQ-PERCEPTION-READY-RETENTION" />
+            <REQUIREMENT ref="REQ-PERCEPTION-NEXT-PULL" />
+            <REQUIREMENT ref="REQ-PERCEPTION-NEXT-WITHOUT-READY" />
+            <REQUIREMENT ref="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE" />
         </TRACES_TO>
     </INTEGRATION_INTERFACE>
 
