@@ -213,6 +213,10 @@
                     Реализовать атомарное применение SUCCESS, PREEMPTED и FAILED
                     только управляющим event loop.
                 </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-STALE-WORKER-RESULT">
+                    Не допускать изменения очереди, состояния события или наблюдения
+                    поздним результатом отменённой либо уже заменённой попытки worker.
+                </WORK_ITEM>
                 <WORK_ITEM id="DP-WORK-CANONICAL-DATA">
                     Реализовать универсальное дерево JSON с json.Number
                     и каноническое наблюдение без semantic enrichment.
@@ -221,6 +225,7 @@
             <EXIT_GATE>
                 <QUEUE_AND_STATE_MUTATION_OWNER>CONTROL_EVENT_LOOP_ONLY</QUEUE_AND_STATE_MUTATION_OWNER>
                 <ACTIVE_NORMALIZATION_WORKERS>AT_MOST_ONE_PER_INSTANCE</ACTIVE_NORMALIZATION_WORKERS>
+                <STALE_WORKER_RESULT_STATE_MUTATION>NONE</STALE_WORKER_RESULT_STATE_MUTATION>
                 <PARTIAL_OBSERVATION_CREATION>NONE</PARTIAL_OBSERVATION_CREATION>
                 <PREEMPTED_EVENT_RETAINED>YES</PREEMPTED_EVENT_RETAINED>
                 <FAILED_EVENT_REMOVED>YES</FAILED_EVENT_REMOVED>
