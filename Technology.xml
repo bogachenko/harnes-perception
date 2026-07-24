@@ -141,6 +141,8 @@
             <OWNED_STATE>UNIFIED_QUEUE_AND_EVENT_STATES</OWNED_STATE>
             <STATE_ACCESS>EVENT_LOOP_ONLY</STATE_ACCESS>
             <INGRESS_COMMAND_TRANSPORT>GO_CHANNEL</INGRESS_COMMAND_TRANSPORT>
+            <INGRESS_DECISION_TRANSPORT>GO_CHANNEL</INGRESS_DECISION_TRANSPORT>
+            <INGRESS_COMPLETION>AFTER_EVENT_LOOP_ACCEPT_OR_REJECT</INGRESS_COMPLETION>
             <NEXT_COMMAND_TRANSPORT>GO_CHANNEL</NEXT_COMMAND_TRANSPORT>
             <WORKER_RESULT_TRANSPORT>GO_CHANNEL</WORKER_RESULT_TRANSPORT>
             <NORMALIZATION_EXECUTION>SEPARATE_WORKER_GOROUTINE</NORMALIZATION_EXECUTION>
@@ -156,6 +158,8 @@
                 выполняется отдельной worker goroutine, поэтому event loop продолжает
                 принимать новые события и при поступлении более важного события
                 отменяет текущую нормализацию через context.Context.
+                Решение о принятии или отклонении входного события возвращается HTTP-входу
+                через Go channel до завершения запроса; нормализация для ответа не ожидается.
             </RATIONALE>
             <TRACES_TO>
                 <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
@@ -297,6 +301,12 @@
             <DECODED_REPRESENTATION ref="TECH-TYPED-GO-INPUT-EVENT" />
             <INSTANCE_BINDING>EXPLICIT_HARNES_PERCEPTION_INSTANCE</INSTANCE_BINDING>
             <EVENT_DISPATCH>COMMAND_TO_CONTROL_EVENT_LOOP</EVENT_DISPATCH>
+            <REQUEST_COMPLETION>AFTER_EVENT_LOOP_ACCEPT_OR_REJECT</REQUEST_COMPLETION>
+            <INGRESS_DECISION_OWNER ref="TECH-CONTROL-EVENT-LOOP" />
+            <ACCEPTANCE_EFFECT>VALIDATED_EVENT_TIMESTAMPED_AND_INSERTED_IN_UNIFIED_QUEUE</ACCEPTANCE_EFFECT>
+            <REJECTION_EFFECT>EVENT_NOT_INSERTED_IN_UNIFIED_QUEUE</REJECTION_EFFECT>
+            <NORMALIZATION_COMPLETION_WAIT>NONE</NORMALIZATION_COMPLETION_WAIT>
+            <READY_STATE_WAIT>NONE</READY_STATE_WAIT>
             <ORCHESTRATOR_OPERATION_ACCESS>NONE</ORCHESTRATOR_OPERATION_ACCESS>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
@@ -314,14 +324,22 @@
                 того же экземпляра и не изменяет очередь напрямую. Операции управления
                 очередью и получение готового наблюдения через Next() через HTTP
                 не предоставляются.
+                HTTP-запрос завершается только после решения event loop о принятии
+                или отклонении события. Принятие включает фиксацию timestamp и помещение
+                события в единую очередь. Завершение нормализации и переход в READY
+                для ответа на HTTP-запрос не ожидаются.
             </RATIONALE>
             <TRACES_TO>
                 <ACTOR ref="ACTOR-EXTERNAL-SOURCE" />
                 <INPUT ref="INPUT-EXTERNAL-EVENT" />
                 <ENTITY ref="ENTITY-PERCEPTION-INPUT-EVENT" />
                 <USE_CASE ref="UC-PERCEPTION-SUBMIT-EXTERNAL-DATA" />
+                <REQUIREMENT ref="REQ-PERCEPTION-RECEIPT-TIMESTAMP" />
+                <REQUIREMENT ref="REQ-PERCEPTION-EQUAL-IMPORTANCE-ORDER" />
                 <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
                 <REQUIREMENT ref="REQ-PERCEPTION-ARTIFACT-LINK" />
+                <ERROR_CASE ref="ERR-PERCEPTION-MISSING-IMPORTANCE" />
+                <ERROR_CASE ref="ERR-PERCEPTION-INVALID-IMPORTANCE" />
             </TRACES_TO>
         </HTTP_EVENT_INGRESS>
 
