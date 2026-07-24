@@ -161,4 +161,206 @@
             <INVARIANT ref="INV-PERCEPTION-ARRIVAL-TIME-UNCHANGED" />
         </TRACES_TO>
     </PUBLIC_DATA_TYPES>
+    <HTTP_INGRESS_CONTRACT id="CONTRACT-HTTP-INGRESS" status="DRAFT">
+        <APPROVED_REQUEST_AND_RESPONSE
+            id="CONTRACT-HTTP-REQUEST-RESPONSE"
+            status="APPROVED_BY_OWNER">
+            <REQUEST id="CONTRACT-HTTP-REQUEST">
+                <METHOD>POST</METHOD>
+                <CONTENT_TYPE>application/json</CONTENT_TYPE>
+                <CONTENT_TYPE_PARAMETERS>ALLOWED</CONTENT_TYPE_PARAMETERS>
+                <BODY_ROOT>JSON_OBJECT</BODY_ROOT>
+                <TRAILING_JSON_VALUES>REJECT</TRAILING_JSON_VALUES>
+                <DECODER>encoding/json.Decoder</DECODER>
+                <DECODER_USE_NUMBER>YES</DECODER_USE_NUMBER>
+
+                <FIELD name="source_id" required="YES">
+                    <JSON_TYPE>string</JSON_TYPE>
+                    <EMPTY_STRING>REJECT</EMPTY_STRING>
+                </FIELD>
+
+                <FIELD name="importance" required="YES">
+                    <JSON_TYPE>string</JSON_TYPE>
+                    <VALID_VALUES>low medium high</VALID_VALUES>
+                </FIELD>
+
+                <FIELD name="data" required="YES">
+                    <JSON_TYPE>ANY_JSON_VALUE</JSON_TYPE>
+                    <NULL>ALLOWED</NULL>
+                    <NUMBER_REPRESENTATION>json.Number</NUMBER_REPRESENTATION>
+                </FIELD>
+
+                <FIELD name="artifact" required="NO">
+                    <ABSENT>NO_ARTIFACTS</ABSENT>
+                    <ALLOWED_JSON_FORMS>
+                        <FORM>NON_EMPTY_RELATIVE_PATH_STRING</FORM>
+                        <FORM>NON_EMPTY_ARRAY_OF_NON_EMPTY_RELATIVE_PATH_STRINGS</FORM>
+                    </ALLOWED_JSON_FORMS>
+                    <EMPTY_STRING>REJECT</EMPTY_STRING>
+                    <EMPTY_ARRAY>REJECT</EMPTY_ARRAY>
+                    <EMPTY_ARRAY_ELEMENT>REJECT</EMPTY_ARRAY_ELEMENT>
+                </FIELD>
+            </REQUEST>
+
+            <ARTIFACT_ACCEPTANCE_VALIDATION id="CONTRACT-HTTP-ARTIFACT-VALIDATION">
+                <TIMING>BEFORE_EVENT_ACCEPTANCE_AND_HTTP_202_RESPONSE</TIMING>
+                <PATH_FORM>RELATIVE_ONLY</PATH_FORM>
+                <NORMALIZATION>filepath.Clean</NORMALIZATION>
+                <ABSOLUTE_PATH>REJECT</ABSOLUTE_PATH>
+                <PARENT_TRAVERSAL>REJECT</PARENT_TRAVERSAL>
+                <BASE_AND_COMPONENT_INSPECTION>os.Lstat</BASE_AND_COMPONENT_INSPECTION>
+                <BASE_SYMLINK>REJECT</BASE_SYMLINK>
+                <COMPONENT_SYMLINK>REJECT</COMPONENT_SYMLINK>
+                <INTERMEDIATE_COMPONENT>EXISTING_DIRECTORY</INTERMEDIATE_COMPONENT>
+                <TARGET>EXISTING_REGULAR_FILE</TARGET>
+                <STORED_REFERENCE>
+                    ArtifactRef_WITH_CLEANED_RELATIVE_PATH
+                </STORED_REFERENCE>
+                <FILE_COPYING>NONE</FILE_COPYING>
+                <ACCEPTANCE_GUARANTEE>
+                    EVENT_AND_ARTIFACT_REFERENCES_VALID_AT_ACCEPTANCE_TIME
+                </ACCEPTANCE_GUARANTEE>
+                <POST_ACCEPTANCE_FILE_CHANGE>
+                    MAY_CAUSE_LATER_NORMALIZATION_FAILURE
+                </POST_ACCEPTANCE_FILE_CHANGE>
+            </ARTIFACT_ACCEPTANCE_VALIDATION>
+
+            <ACCEPTANCE id="CONTRACT-HTTP-ACCEPTANCE">
+                <VALIDATION_COMPLETION>BEFORE_ACCEPTANCE_DECISION</VALIDATION_COMPLETION>
+                <DECISION_OWNER>CONTROL_EVENT_LOOP</DECISION_OWNER>
+                <RECEIVED_AT_CAPTURE>
+                    AT_INITIAL_EVENT_ACCEPTANCE
+                </RECEIVED_AT_CAPTURE>
+                <ACCEPTANCE_SEQUENCE_ASSIGNMENT>
+                    AT_INITIAL_EVENT_ACCEPTANCE
+                </ACCEPTANCE_SEQUENCE_ASSIGNMENT>
+                <QUEUE_INSERTION>BEFORE_HTTP_RESPONSE</QUEUE_INSERTION>
+                <NORMALIZATION_WAIT>NONE</NORMALIZATION_WAIT>
+                <READY_WAIT>NONE</READY_WAIT>
+                <REJECTION_QUEUE_EFFECT>NONE</REJECTION_QUEUE_EFFECT>
+            </ACCEPTANCE>
+
+            <RESPONSE_MEDIA_TYPE>application/json</RESPONSE_MEDIA_TYPE>
+
+            <RESPONSE id="CONTRACT-HTTP-RESPONSE-ACCEPTED">
+                <CONDITION>
+                    EVENT_ACCEPTED_AND_INSERTED_IN_UNIFIED_QUEUE
+                </CONDITION>
+                <STATUS>202</STATUS>
+                <STATUS_TEXT>Accepted</STATUS_TEXT>
+                <BODY>{"accepted":true}</BODY>
+            </RESPONSE>
+
+            <RESPONSE id="CONTRACT-HTTP-RESPONSE-BAD-REQUEST">
+                <CONDITION>
+                    INVALID_JSON_OR_REQUEST_FIELD_OR_ARTIFACT
+                </CONDITION>
+                <STATUS>400</STATUS>
+                <STATUS_TEXT>Bad Request</STATUS_TEXT>
+                <BODY_SHAPE>
+                    {"error":{"code":"string","message":"string"}}
+                </BODY_SHAPE>
+            </RESPONSE>
+
+            <RESPONSE id="CONTRACT-HTTP-RESPONSE-METHOD-NOT-ALLOWED">
+                <CONDITION>METHOD_IS_NOT_POST</CONDITION>
+                <STATUS>405</STATUS>
+                <STATUS_TEXT>Method Not Allowed</STATUS_TEXT>
+                <HEADER name="Allow">POST</HEADER>
+                <BODY_SHAPE>
+                    {"error":{"code":"method_not_allowed","message":"string"}}
+                </BODY_SHAPE>
+            </RESPONSE>
+
+            <RESPONSE id="CONTRACT-HTTP-RESPONSE-UNSUPPORTED-MEDIA-TYPE">
+                <CONDITION>
+                    MEDIA_TYPE_IS_NOT_APPLICATION_JSON
+                </CONDITION>
+                <STATUS>415</STATUS>
+                <STATUS_TEXT>Unsupported Media Type</STATUS_TEXT>
+                <BODY_SHAPE>
+                    {"error":{"code":"unsupported_media_type","message":"string"}}
+                </BODY_SHAPE>
+            </RESPONSE>
+
+            <RESPONSE id="CONTRACT-HTTP-RESPONSE-INSTANCE-UNAVAILABLE">
+                <CONDITION>INSTANCE_CLOSING_OR_CLOSED</CONDITION>
+                <STATUS>503</STATUS>
+                <STATUS_TEXT>Service Unavailable</STATUS_TEXT>
+                <BODY_SHAPE>
+                    {"error":{"code":"instance_unavailable","message":"string"}}
+                </BODY_SHAPE>
+            </RESPONSE>
+
+            <RESPONSE id="CONTRACT-HTTP-RESPONSE-INTERNAL-ERROR">
+                <CONDITION>
+                    INTERNAL_EVENT_LOOP_COMMAND_FAILURE
+                </CONDITION>
+                <STATUS>500</STATUS>
+                <STATUS_TEXT>Internal Server Error</STATUS_TEXT>
+                <BODY_SHAPE>
+                    {"error":{"code":"internal_error","message":"string"}}
+                </BODY_SHAPE>
+            </RESPONSE>
+
+            <ERROR_CODES id="CONTRACT-HTTP-ERROR-CODES">
+                <ERROR_CODE
+                    value="method_not_allowed"
+                    status="405" />
+                <ERROR_CODE
+                    value="unsupported_media_type"
+                    status="415" />
+                <ERROR_CODE
+                    value="invalid_json"
+                    status="400" />
+                <ERROR_CODE
+                    value="missing_source_id"
+                    status="400" />
+                <ERROR_CODE
+                    value="invalid_source_id"
+                    status="400" />
+                <ERROR_CODE
+                    value="missing_importance"
+                    status="400" />
+                <ERROR_CODE
+                    value="invalid_importance"
+                    status="400" />
+                <ERROR_CODE
+                    value="missing_data"
+                    status="400" />
+                <ERROR_CODE
+                    value="invalid_artifact"
+                    status="400" />
+                <ERROR_CODE
+                    value="instance_unavailable"
+                    status="503" />
+                <ERROR_CODE
+                    value="internal_error"
+                    status="500" />
+            </ERROR_CODES>
+
+            <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
+
+            <TRACES_TO>
+                <DEVELOPMENT_WORK_ITEM ref="DP-WORK-CONTRACT-HTTP" />
+                <TECHNOLOGY ref="TECH-HTTP-EVENT-INGRESS" />
+                <TECHNOLOGY ref="TECH-UNIVERSAL-GO-JSON-VALUE-TREE" />
+                <TECHNOLOGY ref="TECH-LOCAL-FILE-ARTIFACTS" />
+                <TECHNOLOGY ref="TECH-CONTROL-EVENT-LOOP" />
+                <REQUIREMENT ref="REQ-PERCEPTION-SOURCE-ID" />
+                <REQUIREMENT ref="REQ-PERCEPTION-RECEIPT-TIMESTAMP" />
+                <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ARTIFACT-LINK" />
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-LEVELS" />
+                <ERROR_CASE ref="ERR-PERCEPTION-MISSING-IMPORTANCE" />
+                <ERROR_CASE ref="ERR-PERCEPTION-INVALID-IMPORTANCE" />
+            </TRACES_TO>
+        </APPROVED_REQUEST_AND_RESPONSE>
+
+        <OPEN_DECISIONS>
+            <DECISION id="CONTRACT-HTTP-OPEN-UNKNOWN-FIELDS">
+                UNKNOWN_JSON_FIELD_POLICY
+            </DECISION>
+        </OPEN_DECISIONS>
+    </HTTP_INGRESS_CONTRACT>
 </CONTRACTS>
