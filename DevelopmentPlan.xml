@@ -107,7 +107,10 @@
             <DEPENDS_ON ref="DP-PHASE-CONTRACTS" />
             <SCENARIO_GROUPS>
                 <SCENARIO_GROUP id="DP-SCENARIOS-INGRESS">
-                    Корректный POST, неверный JSON, отсутствующая или недопустимая importance,
+                    Корректный POST application/json, неподдерживаемый HTTP-метод,
+                    неверный Content-Type, неверный JSON, отсутствующая или недопустимая importance,
+                    accepted с фиксацией timestamp и помещением в очередь до ответа,
+                    rejected без помещения в очередь,
                     отсутствие artifact, один artifact и несколько artifact.
                 </SCENARIO_GROUP>
                 <SCENARIO_GROUP id="DP-SCENARIOS-ORDERING">
@@ -300,13 +303,19 @@
                     Декодировать вход через encoding/json с Decoder.UseNumber
                     без multipart и передачи файловых байтов.
                 </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-HTTP-ACCEPTANCE">
+                    Реализовать accepted с фиксацией первоначального timestamp,
+                    acceptance sequence и помещением события в единую очередь до HTTP-ответа;
+                    rejected не помещает событие в очередь.
+                </WORK_ITEM>
                 <WORK_ITEM id="DP-WORK-HTTP-ACK">
                     Завершать запрос только после решения event loop accepted или rejected,
                     не ожидая нормализации или READY.
                 </WORK_ITEM>
                 <WORK_ITEM id="DP-WORK-NEXT">
-                    Реализовать непосредственный вызов Next(): первый READY в едином порядке
-                    либо немедленное отсутствие результата без изменения очереди.
+                    Реализовать непосредственный вызов Next(): успешно вернуть первый READY
+                    в едином порядке и только после этого удалить выданное событие либо немедленно
+                    вернуть отсутствие результата без изменения очереди и состояний событий.
                 </WORK_ITEM>
                 <WORK_ITEM id="DP-WORK-CLOSE">
                     Реализовать прекращение новых команд, отмену worker,
@@ -320,14 +329,23 @@
             <EXIT_GATE>
                 <HTTP_SERVER_OWNER>HOST_APPLICATION</HTTP_SERVER_OWNER>
                 <HTTP_TO_QUEUE_DIRECT_ACCESS>NONE</HTTP_TO_QUEUE_DIRECT_ACCESS>
+                <HTTP_ACCEPTED_EVENT_INSERTION>BEFORE_RESPONSE</HTTP_ACCEPTED_EVENT_INSERTION>
+                <HTTP_REJECTED_EVENT_INSERTION>NONE</HTTP_REJECTED_EVENT_INSERTION>
                 <NEXT_WAITING>NONE</NEXT_WAITING>
+                <NEXT_DELIVERED_EVENT_REMOVAL>AFTER_SUCCESSFUL_RETURN</NEXT_DELIVERED_EVENT_REMOVAL>
+                <NEXT_WITHOUT_READY_STATE_MUTATION>NONE</NEXT_WITHOUT_READY_STATE_MUTATION>
                 <PACKAGE_INITIATED_ORCHESTRATOR_CALLS>NONE</PACKAGE_INITIATED_ORCHESTRATOR_CALLS>
                 <GLOBAL_STATE>NONE</GLOBAL_STATE>
             </EXIT_GATE>
             <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-RECEIPT-TIMESTAMP" />
+                <REQUIREMENT ref="REQ-PERCEPTION-EQUAL-IMPORTANCE-ORDER" />
+                <REQUIREMENT ref="REQ-PERCEPTION-READY-RETENTION" />
                 <REQUIREMENT ref="REQ-PERCEPTION-NEXT-PULL" />
                 <REQUIREMENT ref="REQ-PERCEPTION-NEXT-WITHOUT-READY" />
                 <REQUIREMENT ref="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE" />
+                <ERROR_CASE ref="ERR-PERCEPTION-MISSING-IMPORTANCE" />
+                <ERROR_CASE ref="ERR-PERCEPTION-INVALID-IMPORTANCE" />
                 <TECHNOLOGY ref="TECH-HTTP-EVENT-INGRESS" />
                 <TECHNOLOGY ref="TECH-IN-PROCESS-GO-API" />
                 <TECHNOLOGY ref="TECH-EXPLICIT-INSTANCE-LIFECYCLE" />
