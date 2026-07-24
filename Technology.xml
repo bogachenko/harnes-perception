@@ -286,6 +286,8 @@
             <SERVER_LIFECYCLE>HOST_APPLICATION</SERVER_LIFECYCLE>
             <DEFAULT_SERVE_MUX_REGISTRATION>NONE</DEFAULT_SERVE_MUX_REGISTRATION>
             <PACKAGE_LISTENER_START>NONE</PACKAGE_LISTENER_START>
+            <REQUEST_METHOD>POST</REQUEST_METHOD>
+            <OTHER_REQUEST_METHODS>REJECT</OTHER_REQUEST_METHODS>
             <REQUEST_CONTENT_TYPE>application/json</REQUEST_CONTENT_TYPE>
             <REQUEST_SERIALIZATION>JSON</REQUEST_SERIALIZATION>
             <REQUEST_DECODER>GO_STANDARD_LIBRARY_ENCODING_JSON</REQUEST_DECODER>
@@ -298,6 +300,8 @@
             <ORCHESTRATOR_OPERATION_ACCESS>NONE</ORCHESTRATOR_OPERATION_ACCESS>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
+                Handler принимает внешнее событие только методом HTTP POST.
+                Запросы с другими HTTP-методами отклоняются.
                 HTTP используется только для получения JSON-событий от внешних источников.
                 Тело запроса с Content-Type application/json содержит source_id, importance,
                 data и необязательный artifact как относительный путь либо массив
