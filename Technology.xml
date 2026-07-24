@@ -268,6 +268,15 @@
             <REFERENCE_TARGET>EXISTING_LOCAL_FILE</REFERENCE_TARGET>
             <REFERENCE_REPRESENTATION>RELATIVE_PATH</REFERENCE_REPRESENTATION>
             <REFERENCE_BASE>INITIALIZATION_DIRECTORY</REFERENCE_BASE>
+            <PATH_FORM>RELATIVE_ONLY</PATH_FORM>
+            <PATH_NORMALIZATION>path/filepath.Clean</PATH_NORMALIZATION>
+            <ABSOLUTE_PATHS>REJECT</ABSOLUTE_PATHS>
+            <PARENT_DIRECTORY_TRAVERSAL>REJECT</PARENT_DIRECTORY_TRAVERSAL>
+            <SYMLINK_POLICY>REJECT_BASE_AND_ALL_ARTIFACT_PATH_COMPONENTS</SYMLINK_POLICY>
+            <PATH_COMPONENT_INSPECTION>os.Lstat</PATH_COMPONENT_INSPECTION>
+            <INTERMEDIATE_COMPONENT_TYPE>DIRECTORY</INTERMEDIATE_COMPONENT_TYPE>
+            <TARGET_FILE_TYPE>REGULAR_FILE</TARGET_FILE_TYPE>
+            <STORED_PATH>CLEANED_RELATIVE_PATH</STORED_PATH>
             <FILE_COPYING>NONE</FILE_COPYING>
             <DECISION_BASIS>APPROVED_BY_OWNER</DECISION_BASIS>
             <RATIONALE>
@@ -275,6 +284,11 @@
                 задаётся при инициализации. Для каждого переданного артефакта
                 harnes-perception создаёт ссылку в виде относительного пути
                 внутри этой папки на существующий локальный файл без его копирования.
+                Абсолютные пути и выход из базовой директории через родительские
+                компоненты отклоняются. Базовая директория и каждый компонент пути
+                проверяются через os.Lstat; символические ссылки запрещены.
+                Промежуточные компоненты должны быть директориями, а конечный объект —
+                существующим обычным файлом. Сохраняется очищенный относительный путь.
             </RATIONALE>
             <TRACES_TO>
                 <INPUT ref="INPUT-EXTERNAL-EVENT" />
