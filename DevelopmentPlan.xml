@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEVELOPMENT_PLAN id="DP-HARNES-PERCEPTION" status="DRAFT">
+    <BASELINES id="DP-BASELINES">
+        <REQUIREMENTS_ANALYSIS ref="RA-HARNES-PERCEPTION" required_status="APPROVED_BY_OWNER" />
+        <TECHNOLOGY ref="TECH-HARNES-PERCEPTION" required_status="APPROVED_BY_OWNER" />
+        <RATIONALE>
+            План выполняет утверждённые требования посредством утверждённых технологий.
+            Он не изменяет продуктовые требования, архитектурные границы или технологические решения.
+        </RATIONALE>
+    </BASELINES>
+
+    <EXECUTION_POLICY id="DP-EXECUTION-POLICY">
+        <SEQUENCE>CONTRACTS_THEN_MENTAL_SCENARIOS_THEN_CODE_THEN_TESTS_THEN_VERIFICATION</SEQUENCE>
+        <PHASE_OVERLAP>NONE</PHASE_OVERLAP>
+        <NEXT_PHASE_ENTRY>ONLY_AFTER_PREVIOUS_PHASE_EXIT_GATE</NEXT_PHASE_ENTRY>
+        <PRODUCT_REQUIREMENT_CHANGES>RETURN_TO_REQUIREMENTS_ANALYSIS</PRODUCT_REQUIREMENT_CHANGES>
+        <TECHNOLOGY_CHANGES>RETURN_TO_TECHNOLOGY</TECHNOLOGY_CHANGES>
+        <PUBLIC_CONTRACT_CHANGES_AFTER_APPROVAL>RETURN_TO_CONTRACTS</PUBLIC_CONTRACT_CHANGES_AFTER_APPROVAL>
+        <ESTIMATES_AND_NUMERIC_SLA>NONE</ESTIMATES_AND_NUMERIC_SLA>
+        <TRACES_TO>
+            <CONSTRAINT ref="CONSTRAINT-PERCEPTION-NO-NUMERIC-SLA" />
+        </TRACES_TO>
+    </EXECUTION_POLICY>
+
+    <SCOPE_GUARDS id="DP-SCOPE-GUARDS">
+        <EXTERNAL_BROKER>OUT_OF_SCOPE</EXTERNAL_BROKER>
+        <DATABASE_OR_PERSISTENCE>OUT_OF_SCOPE</DATABASE_OR_PERSISTENCE>
+        <STANDALONE_PROCESS>OUT_OF_SCOPE</STANDALONE_PROCESS>
+        <PACKAGE_OWNED_HTTP_SERVER>OUT_OF_SCOPE</PACKAGE_OWNED_HTTP_SERVER>
+        <DIRECT_GOOGLE_ADK_GO_DEPENDENCY>OUT_OF_SCOPE</DIRECT_GOOGLE_ADK_GO_DEPENDENCY>
+        <AUTHENTICATION_AND_AUTHORIZATION>OUT_OF_SCOPE</AUTHENTICATION_AND_AUTHORIZATION>
+        <MULTIPART_OR_FILE_UPLOAD>OUT_OF_SCOPE</MULTIPART_OR_FILE_UPLOAD>
+        <SEMANTIC_ENRICHMENT>OUT_OF_SCOPE</SEMANTIC_ENRICHMENT>
+        <IMPORTANCE_ASSIGNMENT>EXTERNAL_SOURCE_RESPONSIBILITY</IMPORTANCE_ASSIGNMENT>
+        <NOISE_CLASSIFICATION>EXTERNAL_SOURCE_RESPONSIBILITY</NOISE_CLASSIFICATION>
+        <TRACES_TO>
+            <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-SOURCE" />
+            <REQUIREMENT ref="REQ-PERCEPTION-NOISE-EXCLUDED" />
+            <CRITERION ref="CRITERION-PERCEPTION-NOISE-EXCLUDED" />
+            <TECHNOLOGY ref="TECH-IN-PROCESS-EVENT-QUEUE" />
+            <TECHNOLOGY ref="TECH-MODULE-HARNES-PERCEPTION" />
+            <TECHNOLOGY ref="TECH-HTTP-EVENT-INGRESS" />
+            <TECHNOLOGY ref="TECH-SECURITY" />
+            <TECHNOLOGY ref="TECH-UNIVERSAL-GO-JSON-VALUE-TREE" />
+        </TRACES_TO>
+    </SCOPE_GUARDS>
+
+    <PHASES id="DP-PHASES">
+        <PHASE id="DP-PHASE-CONTRACTS" order="1" status="PLANNED">
+            <NAME>CONTRACT_SPECIFICATION</NAME>
+            <OBJECTIVE>
+                Зафиксировать проверяемые публичные и внутренние контракты до создания кода.
+            </OBJECTIVE>
+            <ENTRY_GATE>
+                <REQUIREMENTS_ANALYSIS_STATUS>APPROVED_BY_OWNER</REQUIREMENTS_ANALYSIS_STATUS>
+                <TECHNOLOGY_STATUS>APPROVED_BY_OWNER</TECHNOLOGY_STATUS>
+            </ENTRY_GATE>
+            <WORK_ITEMS>
+                <WORK_ITEM id="DP-WORK-CONTRACT-PUBLIC-API">
+                    Определить публичные контракты создания и закрытия экземпляра,
+                    получения net/http.Handler и непосредственного вызова Next().
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-CONTRACT-DATA">
+                    Определить типы входного события, канонического наблюдения,
+                    importance, timestamp, data и ссылок на артефакты.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-CONTRACT-HTTP">
+                    Определить HTTP request/response contract, status codes,
+                    ошибки декодирования и результат принятия или отклонения event loop.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-CONTRACT-INTERNAL">
+                    Определить внутренние команды event loop, состояния события,
+                    результаты worker SUCCESS, PREEMPTED и FAILED и правила их применения.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-CONTRACT-TRACEABILITY">
+                    Связать каждый контракт с RequirementsAnalysis.xml и Technology.xml.
+                </WORK_ITEM>
+            </WORK_ITEMS>
+            <EXIT_GATE>
+                <CONTRACTS_COMPLETE>YES</CONTRACTS_COMPLETE>
+                <CONTRACTS_CONSISTENT_WITH_BASELINES>YES</CONTRACTS_CONSISTENT_WITH_BASELINES>
+                <CONTRACTS_STATUS>APPROVED_BY_OWNER</CONTRACTS_STATUS>
+                <CODE_CREATED>NO</CODE_CREATED>
+            </EXIT_GATE>
+            <TRACES_TO>
+                <TECHNOLOGY ref="TECH-TYPED-GO-INPUT-EVENT" />
+                <TECHNOLOGY ref="TECH-TYPED-GO-CANONICAL-OBSERVATION" />
+                <TECHNOLOGY ref="TECH-HTTP-EVENT-INGRESS" />
+                <TECHNOLOGY ref="TECH-IN-PROCESS-GO-API" />
+                <TECHNOLOGY ref="TECH-EXPLICIT-INSTANCE-LIFECYCLE" />
+                <TECHNOLOGY ref="TECH-NORMALIZATION-RESULT-HANDLING" />
+                <REQUIREMENT ref="REQ-PERCEPTION-SOURCE-ID" />
+                <REQUIREMENT ref="REQ-PERCEPTION-RECEIPT-TIMESTAMP" />
+                <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ARTIFACT-LINK" />
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-LEVELS" />
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH" />
+            </TRACES_TO>
+        </PHASE>
+
+        <PHASE id="DP-PHASE-MENTAL-SCENARIOS" order="2" status="PLANNED">
+            <NAME>MENTAL_SCENARIOS</NAME>
+            <OBJECTIVE>
+                До реализации пройти сценарии состояний, конкурентности,
+                ошибок и граничных случаев против утверждённых контрактов.
+            </OBJECTIVE>
+            <DEPENDS_ON ref="DP-PHASE-CONTRACTS" />
+            <SCENARIO_GROUPS>
+                <SCENARIO_GROUP id="DP-SCENARIOS-INGRESS">
+                    Корректный POST, неверный JSON, отсутствующая или недопустимая importance,
+                    отсутствие artifact, один artifact и несколько artifact.
+                </SCENARIO_GROUP>
+                <SCENARIO_GROUP id="DP-SCENARIOS-ORDERING">
+                    Порядок high, medium, low; одинаковая importance; одинаковый timestamp;
+                    сохранение первоначального порядка после отмены.
+                </SCENARIO_GROUP>
+                <SCENARIO_GROUP id="DP-SCENARIOS-PREEMPTION">
+                    Поступление более важного события во время нормализации,
+                    полная отмена, отсутствие частичного наблюдения и повтор с начала.
+                </SCENARIO_GROUP>
+                <SCENARIO_GROUP id="DP-SCENARIOS-NEXT">
+                    Первое READY-событие в едином порядке, отсутствие READY,
+                    успешная выдача и удаление только после успешной выдачи.
+                </SCENARIO_GROUP>
+                <SCENARIO_GROUP id="DP-SCENARIOS-ARTIFACTS">
+                    Абсолютный путь, parent traversal, symlink в базе или компоненте,
+                    отсутствующий файл, директория вместо файла и обычный файл.
+                </SCENARIO_GROUP>
+                <SCENARIO_GROUP id="DP-SCENARIOS-LIFECYCLE">
+                    Close во время worker, команды после начала Close, повторный Close,
+                    независимые экземпляры и отсутствие глобального состояния.
+                </SCENARIO_GROUP>
+                <SCENARIO_GROUP id="DP-SCENARIOS-WORKER-RESULTS">
+                    SUCCESS, PREEMPTED и FAILED, включая поздний результат отменённого worker.
+                </SCENARIO_GROUP>
+            </SCENARIO_GROUPS>
+            <EXIT_GATE>
+                <ALL_REQUIREMENTS_COVERED>YES</ALL_REQUIREMENTS_COVERED>
+                <ALL_ERROR_AND_EDGE_CASES_COVERED>YES</ALL_ERROR_AND_EDGE_CASES_COVERED>
+                <CONTRACT_CONTRADICTIONS>NONE</CONTRACT_CONTRADICTIONS>
+                <SCENARIOS_STATUS>APPROVED_BY_OWNER</SCENARIOS_STATUS>
+                <CODE_CREATED>NO</CODE_CREATED>
+            </EXIT_GATE>
+            <TRACES_TO>
+                <ERROR_CASE ref="ERR-PERCEPTION-MISSING-IMPORTANCE" />
+                <ERROR_CASE ref="ERR-PERCEPTION-INVALID-IMPORTANCE" />
+                <ERROR_CASE ref="ERR-PERCEPTION-PROCESSING-FAILED" />
+                <EDGE_CASE ref="EDGE-PERCEPTION-EQUAL-IMPORTANCE" />
+                <EDGE_CASE ref="EDGE-PERCEPTION-HIGHER-IMPORTANCE-DURING-PROCESSING" />
+                <EDGE_CASE ref="EDGE-PERCEPTION-NEXT-WITHOUT-READY" />
+            </TRACES_TO>
+        </PHASE>
+
+        <PHASE id="DP-PHASE-IMPLEMENTATION-FOUNDATION" order="3" status="PLANNED">
+            <NAME>IMPLEMENTATION_FOUNDATION</NAME>
+            <OBJECTIVE>
+                Создать компилируемую основу импортируемого Go-модуля
+                строго по утверждённым контрактам.
+            </OBJECTIVE>
+            <DEPENDS_ON ref="DP-PHASE-MENTAL-SCENARIOS" />
+            <WORK_ITEMS>
+                <WORK_ITEM id="DP-WORK-GO-MODULE">
+                    Создать go.mod с утверждённым module path и директивой Go.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-PUBLIC-TYPES">
+                    Реализовать утверждённые публичные типы и границы экземпляра.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-INSTANCE-LIFECYCLE">
+                    Реализовать создание экземпляра, автоматический запуск event loop
+                    и безопасное явное закрытие без отдельного Start().
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-NO-THIRD-PARTY">
+                    Подтвердить отсутствие сторонних зависимостей.
+                </WORK_ITEM>
+            </WORK_ITEMS>
+            <EXIT_GATE>
+                <MODULE_COMPILES>YES</MODULE_COMPILES>
+                <PUBLIC_API_MATCHES_APPROVED_CONTRACTS>YES</PUBLIC_API_MATCHES_APPROVED_CONTRACTS>
+                <THIRD_PARTY_DEPENDENCIES>NONE</THIRD_PARTY_DEPENDENCIES>
+            </EXIT_GATE>
+            <TRACES_TO>
+                <TECHNOLOGY ref="TECH-LANGUAGE-GO" />
+                <TECHNOLOGY ref="TECH-GO-STANDARD-LIBRARY" />
+                <TECHNOLOGY ref="TECH-MODULE-HARNES-PERCEPTION" />
+                <TECHNOLOGY ref="TECH-EXPLICIT-INSTANCE-LIFECYCLE" />
+            </TRACES_TO>
+        </PHASE>
+
+        <PHASE id="DP-PHASE-IMPLEMENTATION-CORE" order="4" status="PLANNED">
+            <NAME>EVENT_LOOP_QUEUE_AND_NORMALIZATION</NAME>
+            <OBJECTIVE>
+                Реализовать единую очередь, single-owner event loop,
+                последовательную нормализацию и полную preemption.
+            </OBJECTIVE>
+            <DEPENDS_ON ref="DP-PHASE-IMPLEMENTATION-FOUNDATION" />
+            <WORK_ITEMS>
+                <WORK_ITEM id="DP-WORK-EVENT-STATES">
+                    Реализовать внутренние состояния события без отдельной READY-очереди.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-UNIFIED-ORDER">
+                    Реализовать единый порядок importance, timestamp и acceptance sequence
+                    для выбора обработки и первого READY через Next().
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-CONTROL-EVENT-LOOP">
+                    Реализовать единственного владельца очереди и передачу ingress,
+                    Next и worker result через Go channels.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-NORMALIZATION-WORKER">
+                    Реализовать не более одного активного worker на экземпляр,
+                    отменяемого через context.Context.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-RESULT-COMMIT">
+                    Реализовать атомарное применение SUCCESS, PREEMPTED и FAILED
+                    только управляющим event loop.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-CANONICAL-DATA">
+                    Реализовать универсальное дерево JSON с json.Number
+                    и каноническое наблюдение без semantic enrichment.
+                </WORK_ITEM>
+            </WORK_ITEMS>
+            <EXIT_GATE>
+                <QUEUE_AND_STATE_MUTATION_OWNER>CONTROL_EVENT_LOOP_ONLY</QUEUE_AND_STATE_MUTATION_OWNER>
+                <ACTIVE_NORMALIZATION_WORKERS>AT_MOST_ONE_PER_INSTANCE</ACTIVE_NORMALIZATION_WORKERS>
+                <PARTIAL_OBSERVATION_CREATION>NONE</PARTIAL_OBSERVATION_CREATION>
+                <PREEMPTED_EVENT_RETAINED>YES</PREEMPTED_EVENT_RETAINED>
+                <FAILED_EVENT_REMOVED>YES</FAILED_EVENT_REMOVED>
+            </EXIT_GATE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-ORDER" />
+                <REQUIREMENT ref="REQ-PERCEPTION-EQUAL-IMPORTANCE-ORDER" />
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PREEMPTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ATOMIC-PROCESSING" />
+                <REQUIREMENT ref="REQ-PERCEPTION-RESTART-AFTER-PREEMPTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-QUEUE-RETENTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-SINGLE-QUEUE" />
+                <REQUIREMENT ref="REQ-PERCEPTION-READY-RETENTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-SOURCE-ID" />
+                <REQUIREMENT ref="REQ-PERCEPTION-RECEIPT-TIMESTAMP" />
+                <REQUIREMENT ref="REQ-PERCEPTION-PREPROCESSING-EXTRACTION" />
+                <REQUIREMENT ref="REQ-PERCEPTION-IMPORTANCE-PASSTHROUGH" />
+                <TECHNOLOGY ref="TECH-IN-PROCESS-EVENT-QUEUE" />
+                <TECHNOLOGY ref="TECH-CONTROL-EVENT-LOOP" />
+                <TECHNOLOGY ref="TECH-CONTEXT-CANCELLATION" />
+                <TECHNOLOGY ref="TECH-NORMALIZATION-RESULT-HANDLING" />
+            </TRACES_TO>
+        </PHASE>
+
+        <PHASE id="DP-PHASE-IMPLEMENTATION-ARTIFACTS" order="5" status="PLANNED">
+            <NAME>LOCAL_FILE_ARTIFACTS</NAME>
+            <OBJECTIVE>
+                Реализовать ссылки на существующие обычные файлы
+                внутри настроенной локальной директории без копирования.
+            </OBJECTIVE>
+            <DEPENDS_ON ref="DP-PHASE-IMPLEMENTATION-CORE" />
+            <WORK_ITEMS>
+                <WORK_ITEM id="DP-WORK-ARTIFACT-BASE">
+                    Проверить базовую директорию, заданную при инициализации.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-ARTIFACT-PATHS">
+                    Реализовать filepath.Clean, запрет абсолютных путей и parent traversal.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-ARTIFACT-LSTAT">
+                    Проверить базу и каждый компонент через os.Lstat,
+                    полностью запретить symlink и принять только обычный конечный файл.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-ARTIFACT-REFERENCES">
+                    Включить очищенные относительные пути в каноническое наблюдение
+                    без копирования содержимого файлов.
+                </WORK_ITEM>
+            </WORK_ITEMS>
+            <EXIT_GATE>
+                <OUTSIDE_BASE_REFERENCE>IMPOSSIBLE_BY_IMPLEMENTED_CHECKS</OUTSIDE_BASE_REFERENCE>
+                <SYMLINK_ACCEPTANCE>NONE</SYMLINK_ACCEPTANCE>
+                <FILE_COPYING>NONE</FILE_COPYING>
+            </EXIT_GATE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-ARTIFACT-LINK" />
+                <TECHNOLOGY ref="TECH-LOCAL-FILE-ARTIFACTS" />
+            </TRACES_TO>
+        </PHASE>
+
+        <PHASE id="DP-PHASE-IMPLEMENTATION-INTEGRATION" order="6" status="PLANNED">
+            <NAME>HTTP_INGRESS_NEXT_AND_CLOSE</NAME>
+            <OBJECTIVE>
+                Завершить внешнюю HTTP-границу и прямой in-process Go API
+                на одном экземпляре.
+            </OBJECTIVE>
+            <DEPENDS_ON ref="DP-PHASE-IMPLEMENTATION-ARTIFACTS" />
+            <WORK_ITEMS>
+                <WORK_ITEM id="DP-WORK-HTTP-HANDLER">
+                    Реализовать предоставляемый экземпляром net/http.Handler,
+                    принимающий только POST application/json.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-HTTP-DECODE">
+                    Декодировать вход через encoding/json с Decoder.UseNumber
+                    без multipart и передачи файловых байтов.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-HTTP-ACK">
+                    Завершать запрос только после решения event loop accepted или rejected,
+                    не ожидая нормализации или READY.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-NEXT">
+                    Реализовать непосредственный вызов Next(): первый READY в едином порядке
+                    либо немедленное отсутствие результата без изменения очереди.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-CLOSE">
+                    Реализовать прекращение новых команд, отмену worker,
+                    ожидание event loop и worker и безопасный повторный Close.
+                </WORK_ITEM>
+                <WORK_ITEM id="DP-WORK-INSTANCE-ISOLATION">
+                    Подтвердить независимое состояние нескольких экземпляров
+                    и отсутствие package-global singleton или listener.
+                </WORK_ITEM>
+            </WORK_ITEMS>
+            <EXIT_GATE>
+                <HTTP_SERVER_OWNER>HOST_APPLICATION</HTTP_SERVER_OWNER>
+                <HTTP_TO_QUEUE_DIRECT_ACCESS>NONE</HTTP_TO_QUEUE_DIRECT_ACCESS>
+                <NEXT_WAITING>NONE</NEXT_WAITING>
+                <PACKAGE_INITIATED_ORCHESTRATOR_CALLS>NONE</PACKAGE_INITIATED_ORCHESTRATOR_CALLS>
+                <GLOBAL_STATE>NONE</GLOBAL_STATE>
+            </EXIT_GATE>
+            <TRACES_TO>
+                <REQUIREMENT ref="REQ-PERCEPTION-NEXT-PULL" />
+                <REQUIREMENT ref="REQ-PERCEPTION-NEXT-WITHOUT-READY" />
+                <REQUIREMENT ref="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE" />
+                <TECHNOLOGY ref="TECH-HTTP-EVENT-INGRESS" />
+                <TECHNOLOGY ref="TECH-IN-PROCESS-GO-API" />
+                <TECHNOLOGY ref="TECH-EXPLICIT-INSTANCE-LIFECYCLE" />
+            </TRACES_TO>
+        </PHASE>
+
+        <PHASE id="DP-PHASE-TESTS" order="7" status="PLANNED">
+            <NAME>TESTS</NAME>
+            <OBJECTIVE>
+                Доказать контрактное поведение, порядок, атомарность,
+                безопасность путей и корректность конкурентного исполнения.
+            </OBJECTIVE>
+            <DEPENDS_ON ref="DP-PHASE-IMPLEMENTATION-INTEGRATION" />
+            <TEST_GROUPS>
+                <TEST_GROUP id="DP-TESTS-UNIT">
+                    Табличные unit tests для JSON, importance, порядка,
+                    состояний, результатов worker и artifact path validation.
+                </TEST_GROUP>
+                <TEST_GROUP id="DP-TESTS-INTEGRATION">
+                    Интеграционные тесты HTTP handler, event loop, worker,
+                    Next и Close на одном экземпляре.
+                </TEST_GROUP>
+                <TEST_GROUP id="DP-TESTS-CONCURRENCY">
+                    Детерминированные тесты одновременных ingress, Next,
+                    preemption, worker completion и Close.
+                </TEST_GROUP>
+                <TEST_GROUP id="DP-TESTS-ISOLATION">
+                    Тесты нескольких экземпляров без общего состояния.
+                </TEST_GROUP>
+                <TEST_GROUP id="DP-TESTS-RACE">
+                    Выполнение полного набора с Go race detector.
+                </TEST_GROUP>
+            </TEST_GROUPS>
+            <EXIT_GATE>
+                <GO_TEST_ALL>PASS</GO_TEST_ALL>
+                <GO_TEST_RACE_ALL>PASS</GO_TEST_RACE_ALL>
+                <FLAKY_TESTS>NONE</FLAKY_TESTS>
+                <UNTESTED_APPROVED_CONTRACTS>NONE</UNTESTED_APPROVED_CONTRACTS>
+            </EXIT_GATE>
+            <TRACES_TO>
+                <CRITERION ref="CRITERION-PERCEPTION-SUCCESS" />
+                <CRITERION ref="CRITERION-PERCEPTION-NEXT-WITHOUT-READY" />
+                <INVARIANT ref="INV-PERCEPTION-IMPORTANCE-UNCHANGED" />
+                <INVARIANT ref="INV-PERCEPTION-ARRIVAL-TIME-UNCHANGED" />
+                <INVARIANT ref="INV-PERCEPTION-NO-PARTIAL-OBSERVATION" />
+                <INVARIANT ref="INV-PERCEPTION-READY-RETAINED" />
+                <INVARIANT ref="INV-PERCEPTION-REMOVAL-CONDITIONS" />
+            </TRACES_TO>
+        </PHASE>
+
+        <PHASE id="DP-PHASE-VERIFICATION" order="8" status="PLANNED">
+            <NAME>FINAL_VERIFICATION</NAME>
+            <OBJECTIVE>
+                Независимо проверить реализацию против утверждённых требований,
+                технологий, контрактов и mental scenarios.
+            </OBJECTIVE>
+            <DEPENDS_ON ref="DP-PHASE-TESTS" />
+            <VERIFICATION_ACTIVITIES>
+                <ACTIVITY id="DP-VERIFY-TRACEABILITY">
+                    Построить двунаправленную трассировку requirement → contract →
+                    scenario → code → test → verification result.
+                </ACTIVITY>
+                <ACTIVITY id="DP-VERIFY-STATIC">
+                    Выполнить go vet ./... и проверить отсутствие сторонних зависимостей.
+                </ACTIVITY>
+                <ACTIVITY id="DP-VERIFY-BOUNDARIES">
+                    Проверить отсутствие standalone service, собственного listener,
+                    глобального singleton, persistence и Google ADK Go dependency.
+                </ACTIVITY>
+                <ACTIVITY id="DP-VERIFY-RUNTIME">
+                    Повторно проверить go test ./... и go test -race ./....
+                </ACTIVITY>
+                <ACTIVITY id="DP-VERIFY-DOCUMENTS">
+                    Проверить XML, уникальность ID, разрешение ссылок
+                    и соответствие фактической реализации утверждённым артефактам.
+                </ACTIVITY>
+            </VERIFICATION_ACTIVITIES>
+            <EXIT_GATE>
+                <REQUIREMENTS_COVERAGE>COMPLETE</REQUIREMENTS_COVERAGE>
+                <TECHNOLOGY_CONFORMANCE>PASS</TECHNOLOGY_CONFORMANCE>
+                <CONTRACT_CONFORMANCE>PASS</CONTRACT_CONFORMANCE>
+                <MENTAL_SCENARIO_CONFORMANCE>PASS</MENTAL_SCENARIO_CONFORMANCE>
+                <TESTS>PASS</TESTS>
+                <RACE_DETECTOR>PASS</RACE_DETECTOR>
+                <UNRESOLVED_DEVIATIONS>NONE</UNRESOLVED_DEVIATIONS>
+            </EXIT_GATE>
+            <TRACES_TO>
+                <GOAL ref="GOAL-PERCEPTION-001" />
+                <CRITERION ref="CRITERION-PERCEPTION-SUCCESS" />
+                <CRITERION ref="CRITERION-PERCEPTION-NEXT-WITHOUT-READY" />
+            </TRACES_TO>
+        </PHASE>
+    </PHASES>
+
+    <PLAN_EXIT_GATE id="DP-PLAN-EXIT-GATE">
+        <ALL_PHASES_COMPLETED>YES</ALL_PHASES_COMPLETED>
+        <ALL_PHASE_EXIT_GATES_PASSED>YES</ALL_PHASE_EXIT_GATES_PASSED>
+        <UNAPPROVED_REQUIREMENT_CHANGES>NONE</UNAPPROVED_REQUIREMENT_CHANGES>
+        <UNAPPROVED_TECHNOLOGY_CHANGES>NONE</UNAPPROVED_TECHNOLOGY_CHANGES>
+        <UNAPPROVED_CONTRACT_CHANGES>NONE</UNAPPROVED_CONTRACT_CHANGES>
+        <FINAL_VERIFICATION>PASS</FINAL_VERIFICATION>
+    </PLAN_EXIT_GATE>
+</DEVELOPMENT_PLAN>
