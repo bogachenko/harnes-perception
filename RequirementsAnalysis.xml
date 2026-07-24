@@ -25,8 +25,10 @@
         <ACTOR id="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR">
             Оркестратор Google ADK Go является внешним по отношению
             к harnes-perception компонентом. Когда оркестратор готов принять
-            следующее наблюдение, он самостоятельно вызывает Next() и получает
-            готовое каноническое наблюдение. harnes-perception не инициирует
+            следующее наблюдение, он самостоятельно вызывает Next(). Если готовое
+            наблюдение есть, оркестратор получает его. Если событий в состоянии
+            READY нет, оркестратор получает отсутствие результата и позднее
+            самостоятельно повторяет вызов Next(). harnes-perception не инициирует
             взаимодействие с оркестратором и не контролирует его.
         </ACTOR>
     </ACTORS>
@@ -49,6 +51,12 @@
             наблюдение также содержит созданную harnes-perception ссылку на каждый
             из них. Готовое каноническое наблюдение возвращается внешнему оркестратору
             Google ADK Go в ответ на самостоятельный вызов Next().
+        </OUTPUT>
+
+        <OUTPUT id="OUTPUT-NO-READY-OBSERVATION">
+            Отсутствие результата, возвращаемое внешнему оркестратору Google ADK Go
+            в ответ на вызов Next(), если в единой очереди нет событий в состоянии
+            READY. Ответ возвращается немедленно и не является ошибкой.
         </OUTPUT>
     </OUTPUTS>
 
@@ -136,6 +144,14 @@
             степенью важности, текущая обработка полностью отменяется.
             Отменённое событие остаётся в очереди, не создаёт частичного
             канонического наблюдения и при следующем выборе обрабатывается заново.
+        </EDGE_CASE>
+
+        <EDGE_CASE id="EDGE-PERCEPTION-NEXT-WITHOUT-READY">
+            Если оркестратор Google ADK Go вызывает Next(), когда в единой очереди
+            нет событий в состоянии READY, harnes-perception немедленно возвращает
+            отсутствие результата. Вызов не ожидает появления готового наблюдения,
+            не считается ошибкой и не изменяет состояния событий в очереди.
+            Оркестратор может позднее самостоятельно повторить вызов Next().
         </EDGE_CASE>
     </EDGE_CASES>
 
@@ -246,6 +262,13 @@
             возвращает готовое каноническое наблюдение.
         </REQUIREMENT>
 
+        <REQUIREMENT id="REQ-PERCEPTION-NEXT-WITHOUT-READY">
+            Если при вызове Next() в единой очереди нет событий в состоянии READY,
+            harnes-perception немедленно возвращает отсутствие результата.
+            Вызов не ожидает появления готового наблюдения и не является ошибкой.
+            Оркестратор позднее самостоятельно повторяет вызов Next().
+        </REQUIREMENT>
+
         <REQUIREMENT id="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE">
             Оркестратор Google ADK Go не является частью harnes-perception.
             harnes-perception не инициирует вызовы оркестратора, не управляет
@@ -275,6 +298,13 @@
             в единой очереди. Когда внешний оркестратор Google ADK Go самостоятельно
             вызывает Next(), harnes-perception возвращает готовое наблюдение
             и после успешной выдачи удаляет событие из очереди.
+        </CRITERION>
+
+        <CRITERION id="CRITERION-PERCEPTION-NEXT-WITHOUT-READY">
+            Если в момент вызова Next() ни одно событие не находится в состоянии
+            READY, harnes-perception без ожидания возвращает отсутствие результата.
+            Ответ не является ошибкой, очередь и состояния находящихся в ней событий
+            не изменяются. Оркестратор может позднее повторить вызов Next().
         </CRITERION>
 
         <CRITERION id="CRITERION-PERCEPTION-NOISE-EXCLUDED">
@@ -342,12 +372,15 @@
             <ACTOR ref="ACTOR-GOOGLE-ADK-GO-ORCHESTRATOR" />
             <ACTION>
                 Когда оркестратор готов принять следующее наблюдение,
-                самостоятельно вызвать Next() и получить готовое каноническое
-                наблюдение, возвращённое harnes-perception.
+                самостоятельно вызвать Next(). Если событие в состоянии READY есть,
+                получить готовое каноническое наблюдение. Если событий в состоянии
+                READY нет, немедленно получить отсутствие результата и позднее
+                самостоятельно повторить вызов Next().
             </ACTION>
             <GOAL>
-                Получить готовый результат обработки входного события без
-                инициирования взаимодействия со стороны harnes-perception.
+                Получить готовый результат обработки входного события либо
+                немедленное отсутствие результата без инициирования взаимодействия
+                со стороны harnes-perception.
             </GOAL>
         </USE_CASE>
     </USE_CASES>
@@ -360,7 +393,9 @@
             отклонённые до помещения в очередь, в модель не входят. После успешного
             формирования канонического наблюдения событие остаётся в этой очереди
             в состоянии READY до успешной выдачи наблюдения по вызову Next().
-            Если обработка завершается ошибкой до формирования канонического
+            Вызов Next() при отсутствии событий в состоянии READY не вызывает
+            перехода состояния ни одного события. Если обработка завершается
+            ошибкой до формирования канонического
             наблюдения, событие удаляется из очереди, после чего модель перестаёт
             применяться к нему. Отдельное постоянное ошибочное состояние не создаётся.
         </SCOPE>
@@ -499,9 +534,12 @@
 
         <STEP order="9" id="STEP-RETURN-OBSERVATION">
             Когда внешний оркестратор Google ADK Go самостоятельно вызывает Next(),
-            вернуть ему готовое каноническое наблюдение и после успешной выдачи
-            удалить соответствующее событие из единой очереди. harnes-perception
-            не инициирует взаимодействие с оркестратором и не контролирует его.
+            проверить наличие события в состоянии READY. Если такое событие есть,
+            вернуть готовое каноническое наблюдение и после успешной выдачи удалить
+            соответствующее событие из единой очереди. Если событий в состоянии READY
+            нет, немедленно вернуть отсутствие результата без ожидания и без изменения
+            состояний событий в очереди. harnes-perception не инициирует взаимодействие
+            с оркестратором и не контролирует его.
         </STEP>
     </BUSINESS_PROCESS>
 
@@ -519,6 +557,9 @@
         <LINK from="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION"
               relation="RECEIVES"
               to="OUTPUT-CANONICAL-OBSERVATION" />
+        <LINK from="UC-PERCEPTION-RETURN-CANONICAL-OBSERVATION"
+              relation="RECEIVES"
+              to="OUTPUT-NO-READY-OBSERVATION" />
 
         <LINK from="BP-PERCEPTION-EVENT-PROCESSING"
               relation="REALIZES"
@@ -529,6 +570,9 @@
         <LINK from="BP-PERCEPTION-EVENT-PROCESSING"
               relation="PRODUCES"
               to="OUTPUT-CANONICAL-OBSERVATION" />
+        <LINK from="BP-PERCEPTION-EVENT-PROCESSING"
+              relation="PRODUCES"
+              to="OUTPUT-NO-READY-OBSERVATION" />
         <LINK from="BP-PERCEPTION-EVENT-PROCESSING"
               relation="USES"
               to="STATE-MODEL-PERCEPTION-INPUT-EVENT" />
@@ -632,6 +676,9 @@
         <LINK from="REQ-PERCEPTION-NEXT-PULL"
               relation="GOVERNS"
               to="STEP-RETURN-OBSERVATION" />
+        <LINK from="REQ-PERCEPTION-NEXT-WITHOUT-READY"
+              relation="GOVERNS"
+              to="STEP-RETURN-OBSERVATION" />
         <LINK from="REQ-PERCEPTION-ORCHESTRATOR-INDEPENDENCE"
               relation="GOVERNS"
               to="STEP-RETURN-OBSERVATION" />
@@ -686,6 +733,9 @@
         <LINK from="EDGE-PERCEPTION-HIGHER-IMPORTANCE-DURING-PROCESSING"
               relation="APPLIES_TO"
               to="STEP-PREEMPT-ON-HIGHER-IMPORTANCE" />
+        <LINK from="EDGE-PERCEPTION-NEXT-WITHOUT-READY"
+              relation="APPLIES_TO"
+              to="STEP-RETURN-OBSERVATION" />
 
         <LINK from="CRITERION-PERCEPTION-SUCCESS"
               relation="VERIFIES"
@@ -726,6 +776,16 @@
         <LINK from="CRITERION-PERCEPTION-SUCCESS"
               relation="VERIFIES"
               to="INV-PERCEPTION-IMPORTANCE-UNCHANGED" />
+
+        <LINK from="CRITERION-PERCEPTION-NEXT-WITHOUT-READY"
+              relation="VERIFIES"
+              to="REQ-PERCEPTION-NEXT-WITHOUT-READY" />
+        <LINK from="CRITERION-PERCEPTION-NEXT-WITHOUT-READY"
+              relation="VERIFIES"
+              to="OUTPUT-NO-READY-OBSERVATION" />
+        <LINK from="CRITERION-PERCEPTION-NEXT-WITHOUT-READY"
+              relation="VERIFIES"
+              to="EDGE-PERCEPTION-NEXT-WITHOUT-READY" />
 
         <LINK from="CRITERION-PERCEPTION-NOISE-EXCLUDED"
               relation="VERIFIES"
